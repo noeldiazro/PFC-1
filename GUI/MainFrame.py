@@ -55,7 +55,7 @@ class MainFrame(wx.Frame):
 		# EXAMPLE PLOT
 		page = Plot(panel)
 		axes1 = page.figure.gca()
-		axes1.plot([1,2,3],[2,1,4])
+		#axes1.plot([1,2,3],[2,1,4])
 		#
 		
 

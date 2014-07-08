@@ -19,7 +19,8 @@ class AcquisitionGUI(wx.Panel):
 		#	First row
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL) 
 		hbox1.Add(wx.StaticText(self, label='Estado: '),flag=wx.ALIGN_LEFT)
-		self.statusText = wx.StaticText(self, label='Waiting...')
+		self.statusText= wx.TextCtrl(self, style=wx.TE_READONLY | wx.TE_CENTRE)
+		self.statusText.SetValue("NO INPUT.")
 		hbox1.Add(self.statusText,flag=wx.ALIGN_CENTER)
 		self.statusPNG = self.greyLight
 		self.imageCtrl = wx.StaticBitmap(self, wx.ID_ANY, wx.BitmapFromImage(self.statusPNG))
@@ -46,7 +47,7 @@ class AcquisitionGUI(wx.Panel):
 
 		#	Simulation button
 		self.simButton=wx.Button(self,label="Simulación")
-		self.simButton.Bind(wx.EVT_BUTTON, self.simulationClick)
+		self.simButton.Bind(wx.EVT_BUTTON, self.SimulationClick)
 		vbox1.Add(self.simButton,flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=25)
 
 		# Second Column
@@ -61,28 +62,65 @@ class AcquisitionGUI(wx.Panel):
 		hbox.Add(vbox1,1,flag=wx.ALIGN_CENTER|wx.EXPAND)
 		hbox.Add(self.listCtrl,3, flag=wx.EXPAND)
 		self.SetSizerAndFit(hbox)
-
+		
+	"""
+		Initializes all the posible light colors.
+	"""
 	def InitStatusLights(self):
 		self.redLight = wx.Image("./graphics/red_light.png",wx.BITMAP_TYPE_PNG).Scale(16,16)
 		self.greenLight = wx.Image("./graphics/green_light.png",wx.BITMAP_TYPE_PNG).Scale(16,16)
 		self.yellowLight = wx.Image("./graphics/yellow_light.png",wx.BITMAP_TYPE_PNG).Scale(16,16)
 		self.greyLight = wx.Image("./graphics/grey_light.png",wx.BITMAP_TYPE_PNG).Scale(16,16)
 
+	""" 
+		Changes status light for the panel and returns old bitmap.
+	"""
+	def SetStatusLight(self,inp):
+		old = self.imageCtrl.GetBitmap()
+		# if type is wx.Bitmap we show it rightaway
+		if type(inp) is wx.Bitmap:
+			self.imageCtrl.SetBitmap(inp)
+			return old
+		#if is a string with the desired color, we need to convert and use the
+		#	initialized lights.
+		if inp=="red":
+			self.imageCtrl.SetBitmap(wx.BitmapFromImage(self.redLight))
+		elif inp=="green":
+			self.imageCtrl.SetBitmap(wx.BitmapFromImage(self.greenLight))
+		elif inp=="yellow":
+			self.imageCtrl.SetBitmap(wx.BitmapFromImage(self.yellowLight))
+		else:
+			self.imageCtrl.SetBitmap(wx.BitmapFromImage(self.greyLight))
+		return old
 
+	"""
+		Changes status text for the panel and returns old text.
+	"""
+	def SetStatusText(self,text):
+				old = self.statusText.GetValue()
+				self.statusText.ChangeValue(text)
+				return old
 
 	#							#
 	#	E	V	E	N	T	S	#
 	#							#
 
-	def simulationClick(self,event):
+	def SimulationClick(self,event):
+		oldLight = self.SetStatusLight("yellow")
+		oldText = self.SetStatusText("Busy...")
 		openFileDialog = wx.FileDialog(self, "Abrir fichero CSV", "", "","CSV (*.csv)|*.csv", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
 		if openFileDialog.ShowModal() == wx.ID_CANCEL:
+			self.SetStatusLight(oldLight)
+			self.SetStatusText(oldText)
 			return     # the user changed idea...
 
         # proceed loading the file chosen by the user
         # this can be done with e.g. wxPython input streams:
 		self.Module = Simulator.Simulator()
 		self.Module.setFileInput(openFileDialog.GetPath())
+		self.SetStatusLight("red")
+		self.SetStatusText("Ready.")
+		event.GetEventObject().SetLabel(openFileDialog.GetFilename())
 
 
 
