@@ -20,12 +20,14 @@ class Simulator:
 	def start(self):
 		if(self.csv):
 			print "Acquiring Started"
+			self.stopAcq = False
 			self.status="Running"
 			t = Thread(target=self.startAcquiring)
 			t.start()
 
 
 	def stop(self):
+		self.stopAcq=True
 		print "Acquiring Stopped"
 		self.status="Stopped"
 

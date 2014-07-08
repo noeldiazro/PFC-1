@@ -54,8 +54,8 @@ class MainFrame(wx.Frame):
 		## hbox1
 		# EXAMPLE PLOT
 		page = Plot(panel)
-		axes1 = page.figure.gca()
-		#axes1.plot([1,2,3],[2,1,4])
+		self.axes1 = page.figure.gca()
+		#self.axes1.plot([1,2,3],[2,1,4])
 		#
 		
 

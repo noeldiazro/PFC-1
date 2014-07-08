@@ -6,7 +6,9 @@ from classes import Simulator
 class AcquisitionGUI(wx.Panel):
 	def __init__(self, parent):
 		super(AcquisitionGUI,self).__init__(parent)
+		self.parent=parent
 		self.InitUI(parent)
+		#self.parent.axes1.plot([1,2,3],[2,1,4])
 
 	def InitUI(self,parent):
 		self.InitStatusLights()
@@ -32,7 +34,9 @@ class AcquisitionGUI(wx.Panel):
 		#	Sampling rate row
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 		self.samplingRateTCtrl = wx.TextCtrl(self)
+		self.samplingRateTCtrl.Bind(wx.EVT_TEXT, self.SamplingRateTextCtrl)
 		self.SRMeasure = wx.ComboBox(self, choices=["Hz","muestras/seg."],style=wx.CB_READONLY) 
+		self.SRMeasure.Bind(wx.EVT_COMBOBOX, self.SamplingRateComboBox)
 		hbox2.Add(self.samplingRateTCtrl,flag=wx.ALIGN_CENTER)
 		hbox2.Add(self.SRMeasure,flag=wx.ALIGN_CENTER)
 		vbox1.Add(hbox2,flag=wx.ALIGN_CENTER)
@@ -41,6 +45,8 @@ class AcquisitionGUI(wx.Panel):
 		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
 		self.pauseButton=wx.Button(self,label="Pausar")
 		self.startButton=wx.Button(self,label="Empezar")
+		self.pauseButton.Bind(wx.EVT_BUTTON,self.StopClick)
+		self.startButton.Bind(wx.EVT_BUTTON,self.StartClick)
 		hbox3.Add(self.pauseButton,flag=wx.EXPAND|wx.ALL,border=10)
 		hbox3.Add(self.startButton,flag=wx.EXPAND|wx.ALL,border=10)
 		vbox1.Add(hbox3,flag=wx.ALIGN_CENTER)
@@ -122,6 +128,19 @@ class AcquisitionGUI(wx.Panel):
 		self.SetStatusText("Ready.")
 		event.GetEventObject().SetLabel(openFileDialog.GetFilename())
 
+	def StartClick(self,event):
+		self.parent.axes1.plot([1,2,3],[2,1,4])
+		print "plotted"
+		
+
+	def StopClick(self,event):
+		pass
+
+	def SamplingRateTextCtrl(self,event):
+		pass
+
+	def SamplingRateComboBox(self,event):
+		pass
 
 
 
