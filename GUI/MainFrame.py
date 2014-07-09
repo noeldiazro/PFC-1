@@ -53,8 +53,8 @@ class MainFrame(wx.Frame):
 
 		## hbox1
 		# EXAMPLE PLOT
-		page = Plot(panel)
-		self.axes1 = page.figure.gca()
+		self.page = Plot(panel)
+		self.axes1 = self.page.figure.gca()
 		#self.axes1.plot([1,2,3],[2,1,4])
 		#
 		
@@ -71,7 +71,7 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(wx.Panel(self),"Datos")
 		self.nb.AddPage(wx.Panel(self),"Exportar")
 
-		hbox1.Add(page, 1, flag=wx.EXPAND)
+		hbox1.Add(self.page, 1, flag=wx.EXPAND)
 		hbox2.Add(self.nb,1, flag=wx.EXPAND)
 		vbox.Add(hbox1, 2, flag=wx.EXPAND | wx.ALL)
 		vbox.Add(hbox2, 1, flag=wx.EXPAND | wx.ALL)

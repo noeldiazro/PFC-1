@@ -129,12 +129,14 @@ class AcquisitionGUI(wx.Panel):
 		event.GetEventObject().SetLabel(openFileDialog.GetFilename())
 
 	def StartClick(self,event):
-		self.parent.axes1.plot([1,2,3],[2,1,4])
+		self.parent.axes1.plot(self.Module.csv.x,self.Module.csv.y)
+		self.parent.page.canvas.draw()
 		print "plotted"
 		
 
 	def StopClick(self,event):
-		pass
+		self.parent.axes1.plot(self.Module.csv.puntos)
+		self.parent.page.canvas.draw()
 
 	def SamplingRateTextCtrl(self,event):
 		pass
