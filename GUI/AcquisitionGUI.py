@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import wx
 from classes import Simulator
+import matplotlib.lines as lines
 
 class AcquisitionGUI(wx.Panel):
 	def __init__(self, parent):
@@ -107,6 +108,12 @@ class AcquisitionGUI(wx.Panel):
 				self.statusText.ChangeValue(text)
 				return old
 
+	"""
+		Disables widgets so the user won't mess up anything clicking when he's not supposed to.
+	"""
+	def ToggleWidgets(self,status):
+		pass
+
 	#							#
 	#	E	V	E	N	T	S	#
 	#							#
@@ -114,6 +121,7 @@ class AcquisitionGUI(wx.Panel):
 	def SimulationClick(self,event):
 		oldLight = self.SetStatusLight("yellow")
 		oldText = self.SetStatusText("Busy...")
+		self.ToggleWidgets(False)
 		openFileDialog = wx.FileDialog(self, "Abrir fichero CSV", "", "","CSV (*.csv)|*.csv", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
 		if openFileDialog.ShowModal() == wx.ID_CANCEL:
 			self.SetStatusLight(oldLight)
@@ -135,7 +143,8 @@ class AcquisitionGUI(wx.Panel):
 		
 
 	def StopClick(self,event):
-		self.parent.axes1.plot(self.Module.csv.puntos)
+		self.parent.axes1.add_line(lines.Line2D(self.Module.csv.x,self.Module.csv.y,color='r'))
+		#self.parent.axes1.plot(self.Module.csv.puntos)
 		self.parent.page.canvas.draw()
 
 	def SamplingRateTextCtrl(self,event):
