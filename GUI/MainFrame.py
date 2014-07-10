@@ -10,6 +10,9 @@ import matplotlib as mpl
 import GUI.AcquisitionGUI
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as Canvas
 from matplotlib.backends.backend_wxagg import NavigationToolbar2Wx as Toolbar
+from threading import Thread
+import time
+
 
 
 
@@ -22,12 +25,13 @@ class MainFrame(wx.Frame):
 		self.InitUI()
 		self.Centre()
 		self.SetMinSize(self.GetSize())
+		self.__graphRefreshing=False;
 		self.Maximize()
 		self.Show()     
 		
 	def InitUI(self):
 		self.dirname=''
-		self.CreateStatusBar() # A Statusbar in the bottom of the window
+		self.statusbar=self.CreateStatusBar() # A Statusbar in the bottom of the window
 		# Setting up the menu.
 		fileMenu = wx.Menu()
 		helpMenu = wx.Menu()
@@ -65,9 +69,9 @@ class MainFrame(wx.Frame):
 		self.nb = wx.aui.AuiNotebook(panel,style=wx.aui.AUI_NB_TOP)
 
 		# TEST PANELS
-		acqPanel = GUI.AcquisitionGUI.AcquisitionGUI(self)
+		self.acqPanel = GUI.AcquisitionGUI.AcquisitionGUI(self)
 
-		self.nb.AddPage(acqPanel,"Adquisicion")
+		self.nb.AddPage(self.acqPanel,"Adquisicion")
 		self.nb.AddPage(wx.Panel(self),"Datos")
 		self.nb.AddPage(wx.Panel(self),"Exportar")
 
@@ -85,6 +89,28 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.OnOpen, menuOpen)
 		self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 		self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
+
+	"""
+		Graph refreshing. 
+	"""
+	def ToggleGraphRefreshing(self):
+		if self.__graphRefreshing:
+			self.__graphRefreshing=False
+			self.statusbar.PushStatusText("Graph Refreshing OFF.")
+		else:
+			self.__graphRefreshing=True
+			t = Thread(target=self.RefreshGraphLoop)
+			t.daemon=True
+			t.start()
+			self.statusbar.PushStatusText("Graph Refreshing ON.")
+
+
+	def RefreshGraphLoop(self):
+		while (self.__graphRefreshing):
+			self.acqPanel.PushData();
+			self.page.canvas.draw()
+			print "REFRESH"
+			time.sleep(0.5)
 
 
 	def OnAbout(self,e):

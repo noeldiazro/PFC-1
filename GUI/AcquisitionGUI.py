@@ -110,9 +110,25 @@ class AcquisitionGUI(wx.Panel):
 
 	"""
 		Disables widgets so the user won't mess up anything clicking when he's not supposed to.
+		TODO
 	"""
 	def ToggleWidgets(self,status):
-		pass
+		if status==False:
+			self.samplingRateTCtrl.Disable()
+			self.SRMeasure.Disable()
+			self.startButton.Disable()
+			self.pauseButton.Disable()
+			self.simButton.Disable()
+		else:
+			self.samplingRateTCtrl.Enable()
+			self.SRMeasure.Enable()
+			self.startButton.Enable()
+			self.pauseButton.Enable()
+			self.simButton.Enable()
+
+	def PushData(self):
+		self.parent.axes1.add_line(lines.Line2D(self.Module.data.x,self.Module.data.y))
+
 
 	#							#
 	#	E	V	E	N	T	S	#
@@ -126,6 +142,7 @@ class AcquisitionGUI(wx.Panel):
 		if openFileDialog.ShowModal() == wx.ID_CANCEL:
 			self.SetStatusLight(oldLight)
 			self.SetStatusText(oldText)
+			self.ToggleWidgets(True)
 			return     # the user changed idea...
 
         # proceed loading the file chosen by the user
@@ -135,17 +152,22 @@ class AcquisitionGUI(wx.Panel):
 		self.SetStatusLight("red")
 		self.SetStatusText("Ready.")
 		event.GetEventObject().SetLabel(openFileDialog.GetFilename())
+		self.ToggleWidgets(True)
 
 	def StartClick(self,event):
-		self.parent.axes1.plot(self.Module.csv.x,self.Module.csv.y)
-		self.parent.page.canvas.draw()
-		print "plotted"
+		self.startButton.Disable()
+		self.Module.start()
+		self.parent.ToggleGraphRefreshing()
 		
 
 	def StopClick(self,event):
-		self.parent.axes1.add_line(lines.Line2D(self.Module.csv.x,self.Module.csv.y,color='r'))
-		#self.parent.axes1.plot(self.Module.csv.puntos)
+		self.Module.stop()
+		self.startButton.Enable()
+		self.parent.ToggleGraphRefreshing()
+		"""
+		self.parent.axes1.add_line(lines.Line2D(self.Module.csv.p.x,self.Module.csv.p.y,color='r'))
 		self.parent.page.canvas.draw()
+		"""
 
 	def SamplingRateTextCtrl(self,event):
 		pass

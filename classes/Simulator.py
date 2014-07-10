@@ -2,13 +2,14 @@
 from utils import csv_reader
 import time
 from threading import Thread
+import classes.Points as Points
 
 class Simulator:
 	def __init__(self, sampling_rate=1):
 		self.sampling_rate = sampling_rate
 		self.status = "No Input"
 		self.stopAcq = False
-		self.data = []
+		self.data = Points.Points()
 
 	#Given Python nature this isn't very useful
 	def set_sampling_rate(new_sampling_rate):
@@ -46,13 +47,14 @@ class Simulator:
 		print self.csv.strTitle
 
 	def startAcquiring(self):
-		iterator = iter(self.csv.puntos)
 		print "delay:"+str(1.0/self.sampling_rate)
 		while(not self.stopAcq):
 			try:
-				self.data.append(iterator.next())
-				#print time.ctime()
+				tmp=self.csv.p.next()
+				self.data.append(tmp[0],tmp[1])
+				print tmp
 				time.sleep(1.0/self.sampling_rate)
 			except StopIteration:
-				self.stop() 
-				return
+				#start over
+				pass
+				
