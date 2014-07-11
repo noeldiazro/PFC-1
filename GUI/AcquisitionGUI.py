@@ -129,7 +129,14 @@ class AcquisitionGUI(wx.Panel):
 			self.simButton.Enable()
 
 	def PushData(self):
-		self.parent.axes1.add_line(lines.Line2D(self.Module.data.x,self.Module.data.y))
+		try:
+			self.parent.axes1.add_line(lines.Line2D(self.Module.data.x,self.Module.data.y))
+		except RuntimeError as inst:
+			print type(inst)     # the exception instance
+			print inst.args      # arguments stored in .args
+			print inst           # __str__ allows args to printed directly
+			print len(self.Module.data.x)
+			print len(self.Module.data.y)
 
 
 	#							#

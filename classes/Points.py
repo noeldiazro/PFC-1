@@ -7,6 +7,7 @@ class Points:
 		self.x = []
 		self.y = []
 		self.__i = 0
+		self.__offset = 0
 		if (x and y):
 			self.x.append(x)
 			self.y.append(y)
@@ -21,6 +22,12 @@ class Points:
 	def resetIterator(self):
 		self.__i = 0
 	def next(self):
-		self.__i += 1
-		return [self.x[self.__i-1],self.y[self.__i-1]]
+		try:
+			self.__i += 1
+			return [self.x[self.__i-1]+self.__offset,self.y[self.__i-1]]
+		except IndexError:
+			self.__offset=self.x[self.__i-2]
+			self.resetIterator()
+			self.__i += 1
+			return [self.x[self.__i-1]+self.__offset,self.y[self.__i-1]]
 
