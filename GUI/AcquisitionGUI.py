@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import wx
+from wx.lib import masked
 from classes import Simulator
 import matplotlib.lines as lines
 
@@ -34,9 +35,10 @@ class AcquisitionGUI(wx.Panel):
 
 		#	Sampling rate row
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-		self.samplingRateTCtrl = wx.TextCtrl(self)
+		self.samplingRateTCtrl = masked.NumCtrl(self, value=1, fractionWidth=0, allowNegative=False, min=0, max=10000)
 		self.samplingRateTCtrl.Bind(wx.EVT_TEXT, self.SamplingRateTextCtrl)
-		self.SRMeasure = wx.ComboBox(self, choices=["Hz","muestras/seg."],style=wx.CB_READONLY) 
+		self.SRMeasure = wx.ComboBox(self, choices=["Hz"],style=wx.CB_READONLY)
+		self.SRMeasure.SetSelection(0) 
 		self.SRMeasure.Bind(wx.EVT_COMBOBOX, self.SamplingRateComboBox)
 		hbox2.Add(self.samplingRateTCtrl,flag=wx.ALIGN_CENTER)
 		hbox2.Add(self.SRMeasure,flag=wx.ALIGN_CENTER)
@@ -145,8 +147,8 @@ class AcquisitionGUI(wx.Panel):
 			self.ToggleWidgets(True)
 			return     # the user changed idea...
 
-        # proceed loading the file chosen by the user
-        # this can be done with e.g. wxPython input streams:
+		# proceed loading the file chosen by the user
+		# this can be done with e.g. wxPython input streams:
 		self.Module = Simulator.Simulator()
 		self.Module.setFileInput(openFileDialog.GetPath())
 		self.SetStatusLight("red")
@@ -164,13 +166,10 @@ class AcquisitionGUI(wx.Panel):
 		self.Module.stop()
 		self.startButton.Enable()
 		self.parent.ToggleGraphRefreshing()
-		"""
-		self.parent.axes1.add_line(lines.Line2D(self.Module.csv.p.x,self.Module.csv.p.y,color='r'))
-		self.parent.page.canvas.draw()
-		"""
 
 	def SamplingRateTextCtrl(self,event):
-		pass
+		self.Module.sampling_rate = int(self.samplingRateTCtrl.GetValue())
+		
 
 	def SamplingRateComboBox(self,event):
 		pass
