@@ -109,6 +109,7 @@ class MainFrame(wx.Frame):
 		while (self.__graphRefreshing):
 			self.acqPanel.PushData();
 			self.page.canvas.draw()
+			self.axes1.autoscale()
 			print "REFRESH"
 			time.sleep(0.5)
 
@@ -121,6 +122,7 @@ class MainFrame(wx.Frame):
 
 	def OnExit(self,e):
 		self.Close(True)  # Close the frame.
+		exit()
 
 	def OnOpen(self,e):
 		""" Open a file """

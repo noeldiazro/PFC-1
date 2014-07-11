@@ -52,7 +52,6 @@ class Simulator:
 			try:
 				tmp=self.csv.p.next()
 				self.data.append(tmp[0],tmp[1])
-				print tmp
 				time.sleep(1.0/self.sampling_rate)
 			except StopIteration:
 				#start over
