@@ -23,11 +23,16 @@ class Points:
 		self.__i = 0
 	def next(self):
 		try:
-			self.__i += 1
+			if self.__i<self.length():
+				self.__i += 1
+			else:
+				self.__offset += self.x[self.__i-1]
+				self.resetIterator()
+				print "Iterator reset. New offset: ",self.__offset
+			#if self.x[self.__i-1]>3.0: #THIS DEBUG DOES NOTHING WTF
+			#	print [self.x[self.__i-1]+self.__offset,self.y[self.__i-1]]
 			return [self.x[self.__i-1]+self.__offset,self.y[self.__i-1]]
-		except IndexError:
-			self.__offset=self.x[self.__i-2]
-			self.resetIterator()
-			self.__i += 1
-			return [self.x[self.__i-1]+self.__offset,self.y[self.__i-1]]
-
+		except IndexError  as e:
+			print type(e)     # the exception instance
+			print e.args      # arguments stored in .args
+			print e           # __str__ allows args to printed directly
