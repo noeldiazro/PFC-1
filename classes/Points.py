@@ -29,8 +29,7 @@ class Points:
 				self.__offset += self.x[self.__i-1]
 				self.resetIterator()
 				print "Iterator reset. New offset: ",self.__offset
-			#if self.x[self.__i-1]>3.0: #THIS DEBUG DOES NOTHING WTF
-			#	print [self.x[self.__i-1]+self.__offset,self.y[self.__i-1]]
+				return [self.x[self.__i]+self.__offset,self.y[self.__i]]
 			return [self.x[self.__i-1]+self.__offset,self.y[self.__i-1]]
 		except IndexError  as e:
 			print type(e)     # the exception instance
