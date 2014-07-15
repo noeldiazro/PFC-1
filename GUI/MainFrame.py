@@ -108,11 +108,12 @@ class MainFrame(wx.Frame):
 	def RefreshGraphLoop(self):
 		while (self.__graphRefreshing):
 			self.acqPanel.PushData();
-			self.page.canvas.draw()
+			wx.CallAfter(self.__RefreshGraphLoop)
 			self.axes1.autoscale()
-			print "REFRESH"
 			time.sleep(0.5)
-
+	def __RefreshGraphLoop(self):
+		self.page.canvas.draw()
+		
 
 	def OnAbout(self,e):
 		# Create a message dialog box

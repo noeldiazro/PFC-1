@@ -24,6 +24,7 @@ class Simulator:
 			self.stopAcq = False
 			self.status="Running"
 			t = Thread(target=self.startAcquiring)
+			t.daemon=True
 			t.start()
 
 
