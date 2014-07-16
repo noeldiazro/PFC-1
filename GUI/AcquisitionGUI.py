@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import wx
+import threading
 from wx.lib import masked
 from classes import Simulator
 import matplotlib.lines as lines
@@ -10,6 +11,7 @@ class AcquisitionGUI(wx.Panel):
 		super(AcquisitionGUI,self).__init__(parent)
 		self.parent=parent
 		self.InitUI(parent)
+		
 		#self.parent.axes1.plot([1,2,3],[2,1,4])
 
 	def InitUI(self,parent):
@@ -127,10 +129,14 @@ class AcquisitionGUI(wx.Panel):
 			self.startButton.Enable()
 			self.pauseButton.Enable()
 			self.simButton.Enable()
-
+	
+	"""
+		Writes the lines read by the Module into the Axes in MainFrame
+	"""
 	def PushData(self):
 		try:
-			self.parent.axes1.add_line(lines.Line2D(self.Module.data.x,self.Module.data.y))
+			with self.Module.LOCK:
+				self.parent.axes1.add_line(lines.Line2D(self.Module.data.x,self.Module.data.y))
 		except RuntimeError as inst:
 			print type(inst)     # the exception instance
 			print inst.args      # arguments stored in .args

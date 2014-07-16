@@ -1,7 +1,7 @@
 # coding=utf-8
 from utils import csv_reader
 import time
-from threading import Thread
+import threading
 import classes.Points as Points
 
 class Simulator:
@@ -10,6 +10,7 @@ class Simulator:
 		self.status = "No Input"
 		self.stopAcq = False
 		self.data = Points.Points()
+		self.LOCK = threading.Lock()
 
 	#Given Python nature this isn't very useful
 	def set_sampling_rate(new_sampling_rate):
@@ -23,7 +24,7 @@ class Simulator:
 			print "Acquiring Started"
 			self.stopAcq = False
 			self.status="Running"
-			t = Thread(target=self.startAcquiring)
+			t = threading.Thread(target=self.startAcquiring)
 			t.daemon=True
 			t.start()
 
@@ -52,7 +53,8 @@ class Simulator:
 		while(not self.stopAcq):
 			try:
 				tmp=self.csv.p.next()
-				self.data.append(tmp[0],tmp[1])
+				with self.LOCK:
+					self.data.append(tmp[0],tmp[1])
 				time.sleep(1.0/self.sampling_rate)
 			except StopIteration:
 				#start over
