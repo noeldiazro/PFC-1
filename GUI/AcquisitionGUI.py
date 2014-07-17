@@ -11,8 +11,8 @@ class AcquisitionGUI(wx.Panel):
 		super(AcquisitionGUI,self).__init__(parent)
 		self.parent=parent
 		self.InitUI(parent)
-		
-		#self.parent.axes1.plot([1,2,3],[2,1,4])
+		self.drawedPoints = 0
+		self.Module = False
 
 	def InitUI(self,parent):
 		self.InitStatusLights()
@@ -136,7 +136,10 @@ class AcquisitionGUI(wx.Panel):
 	def PushData(self):
 		try:
 			with self.Module.LOCK:
-				self.parent.axes1.add_line(lines.Line2D(self.Module.data.x,self.Module.data.y))
+				x = self.Module.data.x
+				y = self.Module.data.y
+			self.parent.axes1.add_line(lines.Line2D(x[self.drawedPoints-1:],y[self.drawedPoints-1:]))
+			self.drawedPoints=len(x)
 		except RuntimeError as inst:
 			print type(inst)     # the exception instance
 			print inst.args      # arguments stored in .args
@@ -162,7 +165,7 @@ class AcquisitionGUI(wx.Panel):
 
 		# proceed loading the file chosen by the user
 		# this can be done with e.g. wxPython input streams:
-		self.Module = Simulator.Simulator()
+		self.Module = Simulator.Simulator(self.samplingRateTCtrl.GetValue())
 		self.Module.setFileInput(openFileDialog.GetPath())
 		self.SetStatusLight("red")
 		self.SetStatusText("Ready.")
@@ -181,7 +184,8 @@ class AcquisitionGUI(wx.Panel):
 		self.parent.ToggleGraphRefreshing()
 
 	def SamplingRateTextCtrl(self,event):
-		self.Module.sampling_rate = int(self.samplingRateTCtrl.GetValue())
+		if self.Module:
+			self.Module.sampling_rate = int(self.samplingRateTCtrl.GetValue())
 		
 
 	def SamplingRateComboBox(self,event):
