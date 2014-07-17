@@ -179,6 +179,7 @@ class MainFrame(wx.Frame):
 		elif id==4:
 			self.update_frequency=-1
 			self.__graphRefreshing = False
+			return
 		elif id==5:
 			self.autoscale = e.GetEventObject().isChecked()
 			return
