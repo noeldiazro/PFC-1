@@ -27,16 +27,32 @@ class MainFrame(wx.Frame):
 		self.SetMinSize(self.GetSize())
 		self.__graphRefreshing=False;
 		self.Maximize()
-		self.Show()     
+		self.Show()
+
+		#Variables used by the graph control
+		self.update_frequency = 2
+		self.autoscale = True
 		
 	def InitUI(self):
 		self.dirname=''
 		self.statusbar=self.CreateStatusBar() # A Statusbar in the bottom of the window
 		# Setting up the menu.
 		fileMenu = wx.Menu()
+		viewMenu = wx.Menu()
 		helpMenu = wx.Menu()
 		menuOpen = fileMenu.Append(wx.ID_OPEN, "&Abrir"," Abrir una sesión")
 		menuExit = fileMenu.Append(wx.ID_EXIT,"&Salir"," Salir del programa")
+
+		#View menu structure
+		vm_updateFreqSM = wx.Menu()
+		vm_ufsm_fast = vm_updateFreqSM.Append(1, "Rápida (2s)",kind=wx.ITEM_RADIO)
+		vm_ufsm_normal = vm_updateFreqSM.Append(2, "Normal (5s)",kind=wx.ITEM_RADIO)
+		vm_ufsm_slow = vm_updateFreqSM.Append(3, "Lenta (10s)",kind=wx.ITEM_RADIO)
+		vm_ufsm_off = vm_updateFreqSM.Append(4, "Desactivar",kind=wx.ITEM_RADIO)
+		vm_updateFreqSM.AppendSeparator()
+		vm_ufsm_autos = vm_updateFreqSM.Append(5, "Autoescalado",kind=wx.ITEM_CHECK).Check()
+
+		viewMenu.AppendSubMenu(vm_updateFreqSM,"Frecuencia de actualización")
 
 		menuHelp= helpMenu.Append(wx.ID_HELP, "&Ayuda"," Ayuda general")
 		menuAbout= helpMenu.Append(wx.ID_ABOUT, "Acerca &de"," Acerca de este programa")
@@ -44,6 +60,7 @@ class MainFrame(wx.Frame):
 		# Creating the menubar.
 		menuBar = wx.MenuBar()
 		menuBar.Append(fileMenu,"&Archivo") # Adding the "fileMenu" to the MenuBar
+		menuBar.Append(viewMenu,"&Ver")
 		menuBar.Append(helpMenu,"&A&yuda")
 		self.SetMenuBar(menuBar)  # Adding the MenuBar to the Frame content.
 
@@ -90,10 +107,18 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 		self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
 
+		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_fast)
+		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_normal)
+		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_slow)
+		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_off)
+		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_autos)
+
+
 	"""
 		Graph refreshing. 
 	"""
 	def ToggleGraphRefreshing(self):
+
 		if self.__graphRefreshing:
 			self.__graphRefreshing=False
 			self.statusbar.PushStatusText("Graph Refreshing OFF.")
@@ -109,10 +134,17 @@ class MainFrame(wx.Frame):
 		while (self.__graphRefreshing):
 			self.acqPanel.PushData();
 			wx.CallAfter(self.__RefreshGraphLoop)
-			self.axes1.autoscale()
-			time.sleep(0.5)
+			if self.autoscale:
+				self.axes1.autoscale()
+			time.sleep(self.update_frequency)
 	def __RefreshGraphLoop(self):
 		self.page.canvas.draw()
+
+
+
+	#							#
+	#	E	V	E	N	T	S	#
+	#							#
 		
 
 	def OnAbout(self,e):
@@ -135,6 +167,22 @@ class MainFrame(wx.Frame):
 
 			f.close()
 		dlg.Destroy()
+
+	def SetUpdateFrequency(self,e):
+		id=e.GetId()
+		if id==1:
+			self.update_frequency=2
+		elif id==2:
+			self.update_frequency=5
+		elif id==3:
+			self.update_frequency=10
+		elif id==4:
+			self.update_frequency=-1
+			self.__graphRefreshing = False
+		elif id==5:
+			self.autoscale = e.GetEventObject().isChecked()
+			return
+
 
 class Plot(wx.Panel):
 	def __init__(self, parent, id = -1, dpi = None, **kwargs):
