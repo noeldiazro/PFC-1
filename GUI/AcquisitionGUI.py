@@ -138,8 +138,8 @@ class AcquisitionGUI(wx.Panel):
 			with self.Module.LOCK:
 				x = self.Module.data.x
 				y = self.Module.data.y
-			self.parent.axes1.add_line(lines.Line2D(x[self.drawedPoints-1:],y[self.drawedPoints-1:]))
-			self.drawedPoints=len(x)
+				self.parent.axes1.add_line(lines.Line2D(x[self.drawedPoints-1:],y[self.drawedPoints-1:]))
+				self.drawedPoints=len(x)
 		except RuntimeError as inst:
 			print type(inst)     # the exception instance
 			print inst.args      # arguments stored in .args
