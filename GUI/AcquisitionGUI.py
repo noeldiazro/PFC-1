@@ -7,12 +7,13 @@ from classes import Simulator
 import matplotlib.lines as lines
 
 class AcquisitionGUI(wx.Panel):
-	def __init__(self, parent):
+	def __init__(self, parent,channel_id):
 		super(AcquisitionGUI,self).__init__(parent)
 		self.parent=parent
 		self.InitUI(parent)
 		self.drawedPoints = 0
 		self.Module = False
+		self.channel_id = channel_id
 
 	def InitUI(self,parent):
 		self.InitStatusLights()
@@ -175,12 +176,14 @@ class AcquisitionGUI(wx.Panel):
 	def StartClick(self,event):
 		self.startButton.Disable()
 		self.Module.start()
+		self.parent.channel_active[self.channel_id]=True
 		self.parent.ToggleGraphRefreshing()
 		
 
 	def StopClick(self,event):
 		self.Module.stop()
 		self.startButton.Enable()
+		self.parent.channel_active[self.channel_id]=False
 		self.parent.ToggleGraphRefreshing()
 
 	def SamplingRateTextCtrl(self,event):

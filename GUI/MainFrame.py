@@ -32,6 +32,7 @@ class MainFrame(wx.Frame):
 		#Variables used by the graph control
 		self.update_frequency = 2
 		self.autoscale = True
+		self.channel_active = [False,False]
 		
 	def InitUI(self):
 		self.dirname=''
@@ -86,7 +87,7 @@ class MainFrame(wx.Frame):
 		self.nb = wx.aui.AuiNotebook(panel,style=wx.aui.AUI_NB_TOP)
 
 		# TEST PANELS
-		self.acqPanel = GUI.AcquisitionGUI.AcquisitionGUI(self)
+		self.acqPanel = GUI.AcquisitionGUI.AcquisitionGUI(self,0)
 
 		self.nb.AddPage(self.acqPanel,"Adquisicion")
 		self.nb.AddPage(wx.Panel(self),"Datos")
@@ -118,11 +119,10 @@ class MainFrame(wx.Frame):
 		Graph refreshing. 
 	"""
 	def ToggleGraphRefreshing(self):
-
 		if self.__graphRefreshing:
 			self.__graphRefreshing=False
 			self.statusbar.PushStatusText("Graph Refreshing OFF.")
-		else:
+		elif self.update_frequency != -1:
 			self.__graphRefreshing=True
 			t = Thread(target=self.RefreshGraphLoop)
 			t.daemon=True
@@ -178,12 +178,14 @@ class MainFrame(wx.Frame):
 			self.update_frequency=10
 		elif id==4:
 			self.update_frequency=-1
-			self.__graphRefreshing = False
+			if self.__graphRefreshing:
+				self.ToggleGraphRefreshing()
 			return
 		elif id==5:
 			self.autoscale = e.GetEventObject().isChecked()
 			return
-
+		if any(self.channel_active) and not self.__graphRefreshing:
+			self.ToggleGraphRefreshing()
 
 class Plot(wx.Panel):
 	def __init__(self, parent, id = -1, dpi = None, **kwargs):
