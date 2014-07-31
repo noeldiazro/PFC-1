@@ -4,7 +4,11 @@ import wx
 import threading
 from wx.lib import masked
 from classes import Simulator
+from utils.PointUtils import PointsToDoubleLists
 import matplotlib.lines as lines
+import piDA
+from piDA.interfaces import piDAInterface
+
 
 class AcquisitionGUI(wx.Panel):
 	def __init__(self, parent,channel_id):
@@ -12,7 +16,9 @@ class AcquisitionGUI(wx.Panel):
 		self.parent=parent
 		self.InitUI(parent)
 		self.drawedPoints = 0
-		self.Module = False
+		inter0 = piDAInterface()
+		ch0 = inter0.get_channel_by_id(channel_id)
+		self.Module = piDA.Acquisition(1,ch0)
 		self.channel_id = channel_id
 
 	def InitUI(self,parent):
@@ -137,10 +143,14 @@ class AcquisitionGUI(wx.Panel):
 	def PushData(self):
 		try:
 			with self.Module.LOCK:
-				x = self.Module.data.x
-				y = self.Module.data.y
-				self.parent.axes1.add_line(lines.Line2D(x[self.drawedPoints-1:],y[self.drawedPoints-1:]))
-				self.drawedPoints=len(x)
+				# piDA allows us to ask for the number of points we want to retrieve. 
+				#	In order to trick the lib we need to pass the "minus drawed points":
+				lists = PointsToDoubleLists(self.Module.get_data(-self.drawedPoints))
+				self.parent.axes1.add_line(lines.Line2D(lists[0],lists[1]))
+				# To get the continuous line of plot, we have to add the drawed points minus the last one 
+				#	so we will ask for it again:
+				self.drawedPoints=self.drawedPoints+len(lists[0])-1
+
 		except RuntimeError as inst:
 			print type(inst)     # the exception instance
 			print inst.args      # arguments stored in .args
