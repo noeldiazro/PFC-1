@@ -178,12 +178,13 @@ class MainFrame(wx.Frame):
 			self.update_frequency=10
 		elif id==4:
 			self.update_frequency=-1
-			if self.__graphRefreshing:
+			if self.__graphRefreshing:	# Turns off graphRefreshing if active.
 				self.ToggleGraphRefreshing()
 			return
 		elif id==5:
 			self.autoscale = e.GetEventObject().isChecked()
 			return
+			# Turns on graphRefreshing if any frequency other than -1 is set and there's an actual channel active.
 		if any(self.channel_active) and not self.__graphRefreshing:
 			self.ToggleGraphRefreshing()
 
