@@ -9,7 +9,7 @@ class Simulator:
 		self.sampling_rate = sampling_rate
 		self.status = "No Input"
 		self.stopAcq = False
-		self.data = Points.Points()
+		self._data = Points.Points()
 		self.LOCK = threading.Lock()
 
 	#Given Python nature this isn't very useful
@@ -34,10 +34,16 @@ class Simulator:
 		print "Acquiring Stopped"
 		self.status="Stopped"
 
-	#or this
-	def get_data():
-		pass
-	#and this
+	def get_data(self, n_count=0):
+		p = []
+		# Data is an iterated Point list, so we have to iterate n_counts
+		p.append(self._data.getLast())
+		for i in range(-n_count-1,self._data.length()):
+			p.append(self._data.next())
+		return p
+
+	data = property(get_data)
+
 	def get_status():
 		pass
 
@@ -54,7 +60,7 @@ class Simulator:
 			try:
 				tmp=self.csv.p.next()
 				with self.LOCK:
-					self.data.append(tmp[0],tmp[1])
+					self._data.append(tmp[0],tmp[1])
 				time.sleep(1.0/self.sampling_rate)
 			except StopIteration:
 				#start over

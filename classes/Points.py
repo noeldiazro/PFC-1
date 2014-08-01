@@ -21,6 +21,8 @@ class Points:
 
 	def resetIterator(self):
 		self.__i = 0
+	def getLast(self):
+		return [self.x[self.__i-1]+self.__offset,self.y[self.__i-1]]
 	def next(self):
 		try:
 			if self.__i<self.length():
