@@ -16,19 +16,28 @@ class AcquisitionGUI(wx.Panel):
 		self.parent=parent
 		self.InitUI(parent)
 		self.drawedPoints = 0
+		#HW Channel initialization through piDA lib
 		inter0 = piDAInterface()
-		ch0 = inter0.get_channel_by_id(channel_id)
-		self.Module = piDA.Acquisition(1,ch0)
-		self.channel_id = channel_id
+		#This tries to initialize the channel.
+		# If it's not available, it will disable the widgets.
+		try:	
+			ch0 = inter0.get_channel_by_id(channel_id)
+			self.Module = piDA.Acquisition(1,ch0)
+		except IndexError:	#Meaning there's no input for this channel.
+			self.ToggleWidgets(False)
+			self.Module=False
+			del inter0
+			self.channel_id = channel_id
 
 	def InitUI(self,parent):
 		self.InitStatusLights()
+		
 		# Sizers
 		hbox = wx.BoxSizer(wx.HORIZONTAL)	# horizonal layout
 		vbox1 = wx.BoxSizer(wx.VERTICAL) 	#first column
 		vbox2 = wx.BoxSizer(wx.VERTICAL) 	#second column
 
-		# First column
+
 		#	First row
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL) 
 		hbox1.Add(wx.StaticText(self, label='Estado: '),flag=wx.ALIGN_LEFT)
@@ -68,17 +77,10 @@ class AcquisitionGUI(wx.Panel):
 		self.simButton.Bind(wx.EVT_BUTTON, self.SimulationClick)
 		vbox1.Add(self.simButton,flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=25)
 
-		# Second Column
-
-		self.listCtrl = wx.ListCtrl(self,style=wx.LC_REPORT)
-		self.listCtrl.InsertColumn(0,"T (s)")
-		self.listCtrl.InsertColumn(1,"Valor")
-
-
 		# Main sizers arrangements
 
 		hbox.Add(vbox1,1,flag=wx.ALIGN_CENTER|wx.EXPAND)
-		hbox.Add(self.listCtrl,3, flag=wx.EXPAND)
+		#hbox.Add(self.listCtrl,3, flag=wx.EXPAND)
 		self.SetSizerAndFit(hbox)
 		
 	"""
