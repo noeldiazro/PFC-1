@@ -12,7 +12,7 @@ from piDA.interfaces import piDAInterface
 
 class AcquisitionGUI(wx.Panel):
 	def __init__(self, parent,channel_id):
-		super(AcquisitionGUI,self).__init__(parent)
+		super(AcquisitionGUI,self).__init__(parent,style=wx.SUNKEN_BORDER)
 		self.parent=parent
 		self.InitUI(parent)
 		self.drawedPoints = 0
@@ -53,9 +53,9 @@ class AcquisitionGUI(wx.Panel):
 
 		#	Sampling rate row
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-		self.samplingRateTCtrl = masked.NumCtrl(self, value=1, fractionWidth=0, allowNegative=False, min=0, max=10000)
+		self.samplingRateTCtrl = masked.NumCtrl(self, value=1, fractionWidth=0, allowNegative=False, min=0, max=10000,autoSize=False)
 		self.samplingRateTCtrl.Bind(wx.EVT_TEXT, self.SamplingRateTextCtrl)
-		self.SRMeasure = wx.ComboBox(self, choices=["Hz"],style=wx.CB_READONLY)
+		self.SRMeasure = wx.ComboBox(self, choices=["Hz"],style=wx.CB_READONLY,size=wx.Size(100, 20))
 		self.SRMeasure.SetSelection(0) 
 		self.SRMeasure.Bind(wx.EVT_COMBOBOX, self.SamplingRateComboBox)
 		hbox2.Add(self.samplingRateTCtrl,flag=wx.ALIGN_CENTER)
@@ -68,14 +68,14 @@ class AcquisitionGUI(wx.Panel):
 		self.startButton=wx.Button(self,label="Empezar")
 		self.pauseButton.Bind(wx.EVT_BUTTON,self.StopClick)
 		self.startButton.Bind(wx.EVT_BUTTON,self.StartClick)
-		hbox3.Add(self.pauseButton,flag=wx.EXPAND|wx.ALL,border=10)
-		hbox3.Add(self.startButton,flag=wx.EXPAND|wx.ALL,border=10)
+		hbox3.Add(self.pauseButton,flag=wx.ALIGN_CENTER|wx.ALL,border=5)
+		hbox3.Add(self.startButton,flag=wx.ALIGN_CENTER|wx.ALL,border=5)
 		vbox1.Add(hbox3,flag=wx.ALIGN_CENTER)
 
 		#	Simulation button
 		self.simButton=wx.Button(self,label="Simulación")
 		self.simButton.Bind(wx.EVT_BUTTON, self.SimulationClick)
-		vbox1.Add(self.simButton,flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=25)
+		vbox1.Add(self.simButton,flag=wx.ALIGN_CENTER|wx.LEFT|wx.RIGHT, border=50)
 
 		# Main sizers arrangements
 

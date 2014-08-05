@@ -87,21 +87,21 @@ class MainFrame(wx.Frame):
 		self.nb = wx.aui.AuiNotebook(panel,style=wx.aui.AUI_NB_TOP)
 
 		# TEST PANELS
-		self.acquitionPage = wx.Panel(self)
+		self.acquisitionPage = wx.Panel(self)
 		apshbox = wx.BoxSizer(wx.HORIZONTAL)
 
 
-		self.acqPanel0 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquitionPage,0)
-		self.acqPanel1 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquitionPage,1)
-		self.acqPanel2 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquitionPage,2)
-		self.acqPanel3 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquitionPage,3)
+		self.acqPanel0 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,0)
+		self.acqPanel1 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,1)
+		self.acqPanel2 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,2)
+		self.acqPanel3 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,3)
 		apshbox.Add(self.acqPanel0,1,flag=wx.EXPAND)
 		apshbox.Add(self.acqPanel1,1,flag=wx.EXPAND)
 		apshbox.Add(self.acqPanel2,1,flag=wx.EXPAND)
 		apshbox.Add(self.acqPanel3,1,flag=wx.EXPAND)
-		self.acquitionPage.SetSizer(apshbox)
+		self.acquisitionPage.SetSizer(apshbox)
 
-		self.nb.AddPage(self.acquitionPage,"Adquisicion")
+		self.nb.AddPage(self.acquisitionPage,"Adquisicion")
 		self.nb.AddPage(wx.Panel(self),"Datos")
 		self.nb.AddPage(wx.Panel(self),"Exportar")
 
