@@ -11,9 +11,10 @@ from piDA.interfaces import piDAInterface
 
 
 class AcquisitionGUI(wx.Panel):
-	def __init__(self, parent,channel_id):
+	def __init__(self, parent, mainFrame,channel_id):
 		super(AcquisitionGUI,self).__init__(parent,style=wx.NO_BORDER)
 		self.parent=parent
+		self.mainFrame=mainFrame
 		self.channel_id = channel_id
 		self.InitUI(parent)
 		self.drawedPoints = 0
@@ -167,7 +168,7 @@ class AcquisitionGUI(wx.Panel):
 				# piDA allows us to ask for the number of points we want to retrieve. 
 				#	In order to trick the lib we need to pass the "minus drawed points":
 				lists = PointsToDoubleLists(self.Module.get_data(-self.drawedPoints))
-				self.parent.axes1.add_line(lines.Line2D(lists[0],lists[1]))
+				self.mainFrame.axes1.add_line(lines.Line2D(lists[0],lists[1]))
 				# To get the continuous line of plot, we have to add the drawed points minus the last one 
 				#	so we will ask for it again:
 				self.drawedPoints=self.drawedPoints+len(lists[0])-1
@@ -207,15 +208,15 @@ class AcquisitionGUI(wx.Panel):
 	def StartClick(self,event):
 		self.startButton.Disable()
 		self.Module.start()
-		self.parent.channel_active[self.channel_id]=True
-		self.parent.ToggleGraphRefreshing()
+		self.mainFrame.channel_active[self.channel_id]=True
+		self.mainFrame.ToggleGraphRefreshing()
 		
 
 	def StopClick(self,event):
 		self.Module.stop()
 		self.startButton.Enable()
-		self.parent.channel_active[self.channel_id]=False
-		self.parent.ToggleGraphRefreshing()
+		self.mainFrame.channel_active[self.channel_id]=False
+		self.mainFrame.ToggleGraphRefreshing()
 
 	def SamplingRateTextCtrl(self,event):
 		if self.Module:

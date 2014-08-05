@@ -32,7 +32,7 @@ class MainFrame(wx.Frame):
 		#Variables used by the graph control
 		self.update_frequency = 2
 		self.autoscale = True
-		self.channel_active = [False,False]
+		self.channel_active = [False,False,False,False]
 		
 	def InitUI(self):
 		self.dirname=''
@@ -77,7 +77,6 @@ class MainFrame(wx.Frame):
 		# EXAMPLE PLOT
 		self.page = Plot(panel)
 		self.axes1 = self.page.figure.gca()
-		#self.axes1.plot([1,2,3],[2,1,4])
 		#
 		
 
@@ -91,10 +90,10 @@ class MainFrame(wx.Frame):
 		apshbox = wx.BoxSizer(wx.HORIZONTAL)
 
 
-		self.acqPanel0 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,0)
-		self.acqPanel1 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,1)
-		self.acqPanel2 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,2)
-		self.acqPanel3 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,3)
+		self.acqPanel0 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,self,0)
+		self.acqPanel1 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,self,1)
+		self.acqPanel2 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,self,2)
+		self.acqPanel3 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,self,3)
 		apshbox.Add(self.acqPanel0,1,flag=wx.EXPAND)
 		apshbox.Add(self.acqPanel1,1,flag=wx.EXPAND)
 		apshbox.Add(self.acqPanel2,1,flag=wx.EXPAND)
@@ -131,7 +130,7 @@ class MainFrame(wx.Frame):
 		Graph refreshing. 
 	"""
 	def ToggleGraphRefreshing(self):
-		if self.__graphRefreshing:
+		if self.__graphRefreshing and not any(self.channel_active):
 			self.__graphRefreshing=False
 			self.statusbar.PushStatusText("Graph Refreshing OFF.")
 		elif self.update_frequency != -1:
@@ -144,7 +143,15 @@ class MainFrame(wx.Frame):
 
 	def RefreshGraphLoop(self):
 		while (self.__graphRefreshing):
-			self.acqPanel.PushData();
+			# Pushes data for each channel if active:
+			if(self.channel_active[0]):
+				self.acqPanel0.PushData();
+			elif(self.channel_active[1]):
+				self.acqPanel1.PushData();
+			elif(self.channel_active[2]):
+				self.acqPanel2.PushData();
+			elif(self.channel_active[3]):
+				self.acqPanel3.PushData();
 			wx.CallAfter(self.__RefreshGraphLoop)
 			if self.autoscale:
 				self.axes1.autoscale()
