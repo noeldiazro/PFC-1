@@ -12,8 +12,9 @@ from piDA.interfaces import piDAInterface
 
 class AcquisitionGUI(wx.Panel):
 	def __init__(self, parent,channel_id):
-		super(AcquisitionGUI,self).__init__(parent,style=wx.SUNKEN_BORDER)
+		super(AcquisitionGUI,self).__init__(parent,style=wx.NO_BORDER)
 		self.parent=parent
+		self.channel_id = channel_id
 		self.InitUI(parent)
 		self.drawedPoints = 0
 		#HW Channel initialization through piDA lib
@@ -23,24 +24,28 @@ class AcquisitionGUI(wx.Panel):
 		try:	
 			ch0 = inter0.get_channel_by_id(channel_id)
 			self.Module = piDA.Acquisition(1,ch0)
+			self.SetStatusLight("green")
+			self.SetStatusText("Ready.")
 		except IndexError:	#Meaning there's no input for this channel.
 			self.ToggleWidgets(False)
 			self.Module=False
 			del inter0
-			self.channel_id = channel_id
 
 	def InitUI(self,parent):
 		self.InitStatusLights()
 		
 		# Sizers
+		text = " Channel #"+str(self.channel_id)+":"
+		box = wx.StaticBox(self, wx.ID_ANY, text)
 		hbox = wx.BoxSizer(wx.HORIZONTAL)	# horizonal layout
+		border = wx.StaticBoxSizer(box, orient=wx.VERTICAL)	# border layout for static box
 		vbox1 = wx.BoxSizer(wx.VERTICAL) 	#first column
 		vbox2 = wx.BoxSizer(wx.VERTICAL) 	#second column
 
 
 		#	First row
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL) 
-		hbox1.Add(wx.StaticText(self, label='Estado: '),flag=wx.ALIGN_LEFT)
+		hbox1.Add(wx.StaticText(self, label='Status: '),flag=wx.ALIGN_CENTER)
 		self.statusText= wx.TextCtrl(self, style=wx.TE_READONLY | wx.TE_CENTRE)
 		self.statusText.SetValue("NO INPUT.")
 		hbox1.Add(self.statusText,flag=wx.ALIGN_CENTER)
@@ -49,9 +54,19 @@ class AcquisitionGUI(wx.Panel):
 		hbox1.Add(self.imageCtrl,border=10,flag=wx.ALIGN_RIGHT)
 		vbox1.Add(hbox1, flag=wx.ALIGN_CENTER)
 
-		vbox1.Add(wx.StaticText(self, label='Frecuencia de muestreo:'),flag=wx.ALIGN_CENTER|wx.TOP,border=10)
+		# Plot color row
+		hbox4 = wx.BoxSizer(wx.HORIZONTAL) 
+		hbox4.Add(wx.StaticText(self, label='Plot color:'),flag=wx.ALIGN_CENTER|wx.TOP,border=2)
+		self.CBPlotColor = wx.ComboBox(self, choices=["Blue","Red","Black","Green","Yellow","None"],style=wx.CB_READONLY,size=wx.Size(100, 20))
+		self.CBPlotColor.SetSelection(self.channel_id) 
+		self.CBPlotColor.Bind(wx.EVT_COMBOBOX, self.PlotColorComboBox)
+		hbox4.Add(self.CBPlotColor,flag=wx.ALIGN_CENTER|wx.TOP,border=2)
+		vbox1.Add(hbox4,flag=wx.ALIGN_CENTER)
 
-		#	Sampling rate row
+		# Sampling rate text
+		vbox1.Add(wx.StaticText(self, label='Sampling rate:'),flag=wx.ALIGN_CENTER|wx.TOP,border=2)
+
+		# And sampling rate row
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 		self.samplingRateTCtrl = masked.NumCtrl(self, value=1, fractionWidth=0, allowNegative=False, min=0, max=10000,autoSize=False)
 		self.samplingRateTCtrl.Bind(wx.EVT_TEXT, self.SamplingRateTextCtrl)
@@ -62,10 +77,11 @@ class AcquisitionGUI(wx.Panel):
 		hbox2.Add(self.SRMeasure,flag=wx.ALIGN_CENTER)
 		vbox1.Add(hbox2,flag=wx.ALIGN_CENTER)
 
+
 		#	Control buttons
 		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
-		self.pauseButton=wx.Button(self,label="Pausar")
-		self.startButton=wx.Button(self,label="Empezar")
+		self.pauseButton=wx.Button(self,label="Stop")
+		self.startButton=wx.Button(self,label="Start")
 		self.pauseButton.Bind(wx.EVT_BUTTON,self.StopClick)
 		self.startButton.Bind(wx.EVT_BUTTON,self.StartClick)
 		hbox3.Add(self.pauseButton,flag=wx.ALIGN_CENTER|wx.ALL,border=5)
@@ -73,14 +89,14 @@ class AcquisitionGUI(wx.Panel):
 		vbox1.Add(hbox3,flag=wx.ALIGN_CENTER)
 
 		#	Simulation button
-		self.simButton=wx.Button(self,label="Simulación")
+		self.simButton=wx.Button(self,label="Simulation")
 		self.simButton.Bind(wx.EVT_BUTTON, self.SimulationClick)
 		vbox1.Add(self.simButton,flag=wx.ALIGN_CENTER|wx.LEFT|wx.RIGHT, border=50)
 
 		# Main sizers arrangements
 
-		hbox.Add(vbox1,1,flag=wx.ALIGN_CENTER|wx.EXPAND)
-		#hbox.Add(self.listCtrl,3, flag=wx.EXPAND)
+		border.Add(vbox1,1,flag=wx.ALIGN_CENTER|wx.EXPAND)
+		hbox.Add(border,1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=2)
 		self.SetSizerAndFit(hbox)
 		
 	"""
@@ -132,12 +148,15 @@ class AcquisitionGUI(wx.Panel):
 			self.startButton.Disable()
 			self.pauseButton.Disable()
 			self.simButton.Disable()
+			self.CBPlotColor.Disable()
+			
 		else:
 			self.samplingRateTCtrl.Enable()
 			self.SRMeasure.Enable()
 			self.startButton.Enable()
 			self.pauseButton.Enable()
 			self.simButton.Enable()
+			self.CBPlotColor.Enable()
 	
 	"""
 		Writes the lines read by the Module into the Axes in MainFrame
@@ -202,6 +221,8 @@ class AcquisitionGUI(wx.Panel):
 		if self.Module:
 			self.Module.sampling_rate = int(self.samplingRateTCtrl.GetValue())
 		
+	def PlotColorComboBox(self,event):
+		pass
 
 	def SamplingRateComboBox(self,event):
 		pass
