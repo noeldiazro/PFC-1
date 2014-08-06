@@ -210,15 +210,32 @@ class AcquisitionGUI(wx.Panel):
 	def StartClick(self,event):
 		self.startButton.Disable()
 		self.Module.start()
+		self.SetStatusText("Active.")
+		self.SetStatusLight("yellow")
 		self.mainFrame.channel_active[self.channel_id]=True
 		self.mainFrame.ToggleGraphRefreshing()
 		
 
 	def StopClick(self,event):
 		self.Module.stop()
-		self.startButton.Enable()
 		self.mainFrame.channel_active[self.channel_id]=False
+		self.SetStatusLight("yellow")
+		self.SetStatusText("Busy...")
+		t = threading.Thread(target=self._updateStoppedStatus)
+		t.daemon=True
+		t.start()
 		self.mainFrame.ToggleGraphRefreshing()
+
+	def _updateStoppedStatus(self):
+		while(self.Module.get_status()=='running'):
+			pass
+		if(self.Module.get_status()=='stopped'):
+			self.SetStatusText("Stopped.")
+			self.SetStatusLight("red")
+		else:
+			self.startButton.Enable()
+			self.SetStatusText("Paused.")
+			self.SetStatusLight("green")
 
 	def SamplingRateTextCtrl(self,event):
 		if self.Module:
