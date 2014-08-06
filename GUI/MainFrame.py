@@ -146,11 +146,11 @@ class MainFrame(wx.Frame):
 			# Pushes data for each channel if active:
 			if(self.channel_active[0]):
 				self.acqPanel0.PushData();
-			elif(self.channel_active[1]):
+			if(self.channel_active[1]):
 				self.acqPanel1.PushData();
-			elif(self.channel_active[2]):
+			if(self.channel_active[2]):
 				self.acqPanel2.PushData();
-			elif(self.channel_active[3]):
+			if(self.channel_active[3]):
 				self.acqPanel3.PushData();
 			wx.CallAfter(self.__RefreshGraphLoop)
 			if self.autoscale:
