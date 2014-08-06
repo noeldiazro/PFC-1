@@ -5,6 +5,7 @@ import threading
 from wx.lib import masked
 from classes import Simulator
 from utils.PointUtils import PointsToDoubleLists
+from utils.MatplotlibUtils import *
 import matplotlib.lines as lines
 import piDA
 from piDA.interfaces import piDAInterface
@@ -16,6 +17,7 @@ class AcquisitionGUI(wx.Panel):
 		self.parent=parent
 		self.mainFrame=mainFrame
 		self.channel_id = channel_id
+		self.plot_color = IntToCharColor(channel_id)
 		self.InitUI(parent)
 		self.drawedPoints = 0
 		#HW Channel initialization through piDA lib
@@ -58,7 +60,7 @@ class AcquisitionGUI(wx.Panel):
 		# Plot color row
 		hbox4 = wx.BoxSizer(wx.HORIZONTAL) 
 		hbox4.Add(wx.StaticText(self, label='Plot color:'),flag=wx.ALIGN_CENTER|wx.TOP,border=2)
-		self.CBPlotColor = wx.ComboBox(self, choices=["Blue","Red","Black","Green","Yellow","None"],style=wx.CB_READONLY,size=wx.Size(100, 20))
+		self.CBPlotColor = wx.ComboBox(self, choices=GetColorList(),style=wx.CB_READONLY,size=wx.Size(100, 20))
 		self.CBPlotColor.SetSelection(self.channel_id) 
 		self.CBPlotColor.Bind(wx.EVT_COMBOBOX, self.PlotColorComboBox)
 		hbox4.Add(self.CBPlotColor,flag=wx.ALIGN_CENTER|wx.TOP,border=2)
@@ -168,7 +170,7 @@ class AcquisitionGUI(wx.Panel):
 				# piDA allows us to ask for the number of points we want to retrieve. 
 				#	In order to trick the lib we need to pass the "minus drawed points":
 				lists = PointsToDoubleLists(self.Module.get_data(-self.drawedPoints))
-				self.mainFrame.axes1.add_line(lines.Line2D(lists[0],lists[1]))
+				self.mainFrame.axes1.add_line(lines.Line2D(lists[0],lists[1],color=self.plot_color))
 				# To get the continuous line of plot, we have to add the drawed points minus the last one 
 				#	so we will ask for it again:
 				self.drawedPoints=self.drawedPoints+len(lists[0])-1
@@ -223,7 +225,7 @@ class AcquisitionGUI(wx.Panel):
 			self.Module.sampling_rate = int(self.samplingRateTCtrl.GetValue())
 		
 	def PlotColorComboBox(self,event):
-		pass
+		self.plot_color = IntToCharColor(event.GetEventObject().GetSelection())
 
 	def SamplingRateComboBox(self,event):
 		pass
