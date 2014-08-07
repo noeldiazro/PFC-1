@@ -22,17 +22,18 @@ class MainFrame(wx.Frame):
 		super(MainFrame, self).__init__(parent, title=title, 
 			size=(-1, -1))
 			
+		#Variables used by the graph control
+		self.update_frequency = 5
+		self.autoscale = True
+		self.channel_active = [False,False,False,False]
+		self.__graphRefreshing=False;
+
+
 		self.InitUI()
 		self.Centre()
 		self.SetMinSize(self.GetSize())
-		self.__graphRefreshing=False;
 		self.Maximize()
 		self.Show()
-
-		#Variables used by the graph control
-		self.update_frequency = 2
-		self.autoscale = True
-		self.channel_active = [False,False,False,False]
 		
 	def InitUI(self):
 		self.dirname=''
@@ -47,7 +48,7 @@ class MainFrame(wx.Frame):
 		#View menu structure
 		vm_updateFreqSM = wx.Menu()
 		vm_ufsm_fast = vm_updateFreqSM.Append(1, "Rápida (2s)",kind=wx.ITEM_RADIO)
-		vm_ufsm_normal = vm_updateFreqSM.Append(2, "Normal (5s)",kind=wx.ITEM_RADIO)
+		vm_ufsm_normal = vm_updateFreqSM.Append(2, "Normal (5s)",kind=wx.ITEM_RADIO).Check()
 		vm_ufsm_slow = vm_updateFreqSM.Append(3, "Lenta (10s)",kind=wx.ITEM_RADIO)
 		vm_ufsm_off = vm_updateFreqSM.Append(4, "Desactivar",kind=wx.ITEM_RADIO)
 		vm_updateFreqSM.AppendSeparator()
@@ -66,7 +67,6 @@ class MainFrame(wx.Frame):
 		self.SetMenuBar(menuBar)  # Adding the MenuBar to the Frame content.
 
 
-		panel = wx.Panel(self)
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
 
@@ -75,7 +75,7 @@ class MainFrame(wx.Frame):
 
 		## hbox1
 		# EXAMPLE PLOT
-		self.page = Plot(panel)
+		self.page = Plot(self)
 		self.axes1 = self.page.figure.gca()
 		#
 		
@@ -83,7 +83,7 @@ class MainFrame(wx.Frame):
 		## hbox2
 
 
-		self.nb = wx.aui.AuiNotebook(panel,style=wx.aui.AUI_NB_TOP)
+		self.nb = wx.aui.AuiNotebook(self,style=wx.aui.AUI_NB_TOP)
 
 		# TEST PANELS
 		self.acquisitionPage = wx.Panel(self)
@@ -111,7 +111,7 @@ class MainFrame(wx.Frame):
 
 		
 
-		panel.SetSizer(vbox)
+		self.SetSizer(vbox)
 
 
 		# Events.
@@ -125,6 +125,8 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_off)
 		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_autos)
 
+		self.Bind(wx.EVT_SLIDER,self.SetUpdateFrequency,self.page.sld_updFreq)
+		self.Bind(wx.EVT_TOGGLEBUTTON,self.TBAutomaticUpdate,self.page.TBGraphRefreshing)
 
 	"""
 		Graph refreshing. 
@@ -143,6 +145,11 @@ class MainFrame(wx.Frame):
 
 	def RefreshGraphLoop(self):
 		while (self.__graphRefreshing):
+			#Failsafe switch.
+			if not any(self.channel_active):
+				print "Failsafe toggling"
+				self.ToggleGraphRefreshing()
+				return
 			# Pushes data for each channel if active:
 			if(self.channel_active[0]):
 				self.acqPanel0.PushData();
@@ -155,7 +162,8 @@ class MainFrame(wx.Frame):
 			wx.CallAfter(self.__RefreshGraphLoop)
 			if self.autoscale:
 				self.axes1.autoscale()
-			time.sleep(self.update_frequency)
+			if (self.update_frequency>0):
+				time.sleep(self.update_frequency)
 	def __RefreshGraphLoop(self):
 		self.page.canvas.draw()
 
@@ -188,13 +196,21 @@ class MainFrame(wx.Frame):
 		dlg.Destroy()
 
 	def SetUpdateFrequency(self,e):
+		#If event comes from the slider.
+		if (e.GetEventType() == wx.EVT_SLIDER.typeId):
+			sld = e.GetEventObject()
+			self.update_frequency=sld.GetValue()
+			return
 		id=e.GetId()
 		if id==1:
 			self.update_frequency=2
+			self.page.sld_updFreq.SetValue(2)
 		elif id==2:
 			self.update_frequency=5
+			self.page.sld_updFreq.SetValue(5)
 		elif id==3:
 			self.update_frequency=10
+			self.page.sld_updFreq.SetValue(10)
 		elif id==4:
 			self.update_frequency=-1
 			if self.__graphRefreshing:	# Turns off graphRefreshing if active.
@@ -207,6 +223,11 @@ class MainFrame(wx.Frame):
 		if any(self.channel_active) and not self.__graphRefreshing:
 			self.ToggleGraphRefreshing()
 
+	def TBAutomaticUpdate(self,e):
+		tb=e.GetEventObject()
+		self.__graphRefreshing=tb.GetValue()
+		self.ToggleGraphRefreshing()
+
 class Plot(wx.Panel):
 	def __init__(self, parent, id = -1, dpi = None, **kwargs):
 		wx.Panel.__init__(self, parent, id=id, **kwargs)
@@ -215,7 +236,16 @@ class Plot(wx.Panel):
 		self.toolbar = Toolbar(self.canvas)
 		self.toolbar.Realize()
 
+		#Update frequency control
+		self.TBGraphRefreshing =  wx.ToggleButton(self,label="Automatic Update",size=(-1,-1))
+		self.TBGraphRefreshing.SetValue(True)
+		self.sld_updFreq = wx.Slider(self, -1, parent.update_frequency, 2, 20, wx.DefaultPosition, (200, -1),wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_TOP | wx.SL_LABELS)
+
 		sizer = wx.BoxSizer(wx.VERTICAL)
+		toolbarSizer = wx.BoxSizer(wx.HORIZONTAL)
+		toolbarSizer.Add(self.toolbar, 1 , wx.LEFT | wx.EXPAND)
+		toolbarSizer.Add(self.TBGraphRefreshing,0,wx.RIGHT | wx.EXPAND)
+		toolbarSizer.Add(self.sld_updFreq,0,wx.RIGHT | wx.EXPAND)
 		sizer.Add(self.canvas,1,wx.EXPAND)
-		sizer.Add(self.toolbar, 0 , wx.LEFT | wx.EXPAND)
+		sizer.Add(toolbarSizer,0,wx.EXPAND)
 		self.SetSizer(sizer)
