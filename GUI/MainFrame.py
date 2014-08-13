@@ -26,7 +26,7 @@ class MainFrame(wx.Frame):
 		self.update_frequency = 5
 		self.autoscale = True
 		self.channel_active = [False,False,False,False]
-		self.__graphRefreshing=False;
+		self.__graphRefreshing=False
 
 
 		self.InitUI()
@@ -44,16 +44,18 @@ class MainFrame(wx.Frame):
 		helpMenu = wx.Menu()
 		menuOpen = fileMenu.Append(wx.ID_OPEN, "&Abrir"," Abrir una sesión")
 		menuExit = fileMenu.Append(wx.ID_EXIT,"&Salir"," Salir del programa")
-
-		#View menu structure
+		
+		#View menu structure partially DISABLED
 		vm_updateFreqSM = wx.Menu()
+		"""
 		vm_ufsm_fast = vm_updateFreqSM.Append(1, "Rápida (2s)",kind=wx.ITEM_RADIO)
 		vm_ufsm_normal = vm_updateFreqSM.Append(2, "Normal (5s)",kind=wx.ITEM_RADIO).Check()
 		vm_ufsm_slow = vm_updateFreqSM.Append(3, "Lenta (10s)",kind=wx.ITEM_RADIO)
 		vm_ufsm_off = vm_updateFreqSM.Append(4, "Desactivar",kind=wx.ITEM_RADIO)
 		vm_updateFreqSM.AppendSeparator()
+		"""
 		vm_ufsm_autos = vm_updateFreqSM.Append(5, "Autoescalado",kind=wx.ITEM_CHECK).Check()
-
+		
 		viewMenu.AppendSubMenu(vm_updateFreqSM,"Frecuencia de actualización")
 
 		menuHelp= helpMenu.Append(wx.ID_HELP, "&Ayuda"," Ayuda general")
@@ -118,38 +120,40 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.OnOpen, menuOpen)
 		self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 		self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
-
+		"""
 		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_fast)
 		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_normal)
 		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_slow)
 		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_off)
+		"""
 		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_autos)
-
+		
 		self.Bind(wx.EVT_SLIDER,self.SetUpdateFrequency,self.page.sld_updFreq)
-		self.Bind(wx.EVT_TOGGLEBUTTON,self.TBAutomaticUpdate,self.page.TBGraphRefreshing)
+		self.Bind(wx.EVT_TOGGLEBUTTON,self.OnTBAutomaticUpdate,self.page.TBGraphRefreshing)
 
 	"""
 		Graph refreshing. 
 	"""
-	def ToggleGraphRefreshing(self):
-		if self.__graphRefreshing and not any(self.channel_active):
+	def ToggleGraphRefreshing(self,check_channels=False):
+		# We don't want to stop the graph refreshing if the call comes from a stopping channel
+		#	and there are other channels still active.
+		if(check_channels and any(self.channel_active) and self.__graphRefreshing):
+			return
+
+		# If we don't want to check the active channels, want to start/stop 'immediately' graph refreshing
+		#	or last conditional was false, we check current status and invert it.
+		if self.__graphRefreshing:
 			self.__graphRefreshing=False
 			self.statusbar.PushStatusText("Graph Refreshing OFF.")
-		elif self.update_frequency != -1:
+		elif self.page.TBGraphRefreshing.GetValue():	#TBGraphRefreshing is the main switch for ON/OFF status.
 			self.__graphRefreshing=True
 			t = Thread(target=self.RefreshGraphLoop)
 			t.daemon=True
 			t.start()
 			self.statusbar.PushStatusText("Graph Refreshing ON.")
 
-
 	def RefreshGraphLoop(self):
 		while (self.__graphRefreshing):
-			#Failsafe switch.
-			if not any(self.channel_active):
-				print "Failsafe toggling"
-				self.ToggleGraphRefreshing()
-				return
 			# Pushes data for each channel if active:
 			if(self.channel_active[0]):
 				self.acqPanel0.PushData();
@@ -164,6 +168,7 @@ class MainFrame(wx.Frame):
 				self.axes1.autoscale()
 			if (self.update_frequency>0):
 				time.sleep(self.update_frequency)
+
 	def __RefreshGraphLoop(self):
 		self.page.canvas.draw()
 
@@ -212,21 +217,23 @@ class MainFrame(wx.Frame):
 			self.update_frequency=10
 			self.page.sld_updFreq.SetValue(10)
 		elif id==4:
-			self.update_frequency=-1
-			if self.__graphRefreshing:	# Turns off graphRefreshing if active.
-				self.ToggleGraphRefreshing()
+			self.page.TBGraphRefreshing.SetValue(False)
+			self.OnTBAutomaticUpdate
 			return
 		elif id==5:
-			self.autoscale = e.GetEventObject().isChecked()
+			self.autoscale = e.GetEventObject().IsChecked(5)
 			return
 			# Turns on graphRefreshing if any frequency other than -1 is set and there's an actual channel active.
 		if any(self.channel_active) and not self.__graphRefreshing:
 			self.ToggleGraphRefreshing()
 
-	def TBAutomaticUpdate(self,e):
+	"""
+		ToggleButton for enabling/disabling auto graph refreshing.
+	"""
+	def OnTBAutomaticUpdate(self,e):
 		tb=e.GetEventObject()
-		self.__graphRefreshing=tb.GetValue()
-		self.ToggleGraphRefreshing()
+		if self.__graphRefreshing != tb.GetValue() and any(self.channel_active):	# We want to enable graph refreshing
+			self.ToggleGraphRefreshing()											# 	if channels are active, for sure.
 
 class Plot(wx.Panel):
 	def __init__(self, parent, id = -1, dpi = None, **kwargs):

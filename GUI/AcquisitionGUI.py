@@ -213,7 +213,7 @@ class AcquisitionGUI(wx.Panel):
 		self.SetStatusText("Active.")
 		self.SetStatusLight("yellow")
 		self.mainFrame.channel_active[self.channel_id]=True
-		self.mainFrame.ToggleGraphRefreshing()
+		self.mainFrame.ToggleGraphRefreshing(check_channels=True)
 		
 
 	def StopClick(self,event):
@@ -224,7 +224,7 @@ class AcquisitionGUI(wx.Panel):
 		t = threading.Thread(target=self._updateStoppedStatus)
 		t.daemon=True
 		t.start()
-		self.mainFrame.ToggleGraphRefreshing()
+		self.mainFrame.ToggleGraphRefreshing(check_channels=True)
 
 	def _updateStoppedStatus(self):
 		while(self.Module.get_status()=='running'):
