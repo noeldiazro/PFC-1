@@ -18,6 +18,7 @@ class AcquisitionGUI(wx.Panel):
 		self.mainFrame=mainFrame
 		self.channel_id = channel_id
 		self.plot_color = IntToCharColor(channel_id)
+		self.time_offset=0
 		self.InitUI(parent)
 		self.drawedPoints = 0
 		#HW Channel initialization through piDA lib
@@ -166,11 +167,12 @@ class AcquisitionGUI(wx.Panel):
 	"""
 	def PushData(self):
 		try:
+
 			with self.Module.LOCK:
 				# piDA allows us to ask for the number of points we want to retrieve. 
 				#	In order to trick the lib we need to pass the "minus drawed points":
 				lists = PointsToDoubleLists(self.Module.get_data(-self.drawedPoints))
-				self.mainFrame.axes1.add_line(lines.Line2D(lists[0],lists[1],color=self.plot_color))
+				self.mainFrame.axes1.add_line(lines.Line2D([x+self.time_offset for x in lists[0]],lists[1],color=self.plot_color))
 				# To get the continuous line of plot, we have to add the drawed points minus the last one 
 				#	so we will ask for it again:
 				self.drawedPoints=self.drawedPoints+len(lists[0])-1
@@ -214,7 +216,16 @@ class AcquisitionGUI(wx.Panel):
 		self.SetStatusLight("yellow")
 		self.mainFrame.channel_active[self.channel_id]=True
 		self.mainFrame.ToggleGraphRefreshing(check_channels=True)
-		
+
+		#Offset calc:
+		if(self.mainFrame.master_channel):
+			#Prints for debugging purposes
+			print self.Module.start_time
+			print self.mainFrame.master_channel.start_time
+			self.time_offset=(self.Module.start_time-self.mainFrame.master_channel.start_time)
+			print self.time_offset
+		else:
+			self.mainFrame.set_master_module(self.Module)
 
 	def StopClick(self,event):
 		self.Module.stop()

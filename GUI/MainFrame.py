@@ -26,6 +26,7 @@ class MainFrame(wx.Frame):
 		self.update_frequency = 5
 		self.autoscale = True
 		self.channel_active = [False,False,False,False]
+		self.master_channel = False
 		self.__graphRefreshing=False
 
 
@@ -172,6 +173,10 @@ class MainFrame(wx.Frame):
 	def __RefreshGraphLoop(self):
 		self.page.canvas.draw()
 
+	def set_master_module(self,module):
+		if not(self.master_channel):
+			self.master_channel=module
+			print "MASTER MODULO CAMBIADO"
 
 
 	#							#
