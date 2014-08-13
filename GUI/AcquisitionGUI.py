@@ -220,8 +220,8 @@ class AcquisitionGUI(wx.Panel):
 		#Offset calc:
 		if(self.mainFrame.master_channel):
 			#Prints for debugging purposes
-			print self.Module.start_time
-			print self.mainFrame.master_channel.start_time
+			while(self.Module.start_time==0.0):
+				continue
 			self.time_offset=(self.Module.start_time-self.mainFrame.master_channel.start_time)
 			print self.time_offset
 		else:

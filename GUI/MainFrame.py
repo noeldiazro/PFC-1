@@ -129,6 +129,7 @@ class MainFrame(wx.Frame):
 		"""
 		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_autos)
 		
+		self.Bind(wx.EVT_BUTTON,self.OnStartAll)
 		self.Bind(wx.EVT_SLIDER,self.SetUpdateFrequency,self.page.sld_updFreq)
 		self.Bind(wx.EVT_TOGGLEBUTTON,self.OnTBAutomaticUpdate,self.page.TBGraphRefreshing)
 
@@ -176,7 +177,6 @@ class MainFrame(wx.Frame):
 	def set_master_module(self,module):
 		if not(self.master_channel):
 			self.master_channel=module
-			print "MASTER MODULO CAMBIADO"
 
 
 	#							#
@@ -240,6 +240,15 @@ class MainFrame(wx.Frame):
 		if self.__graphRefreshing != tb.GetValue() and any(self.channel_active):	# We want to enable graph refreshing
 			self.ToggleGraphRefreshing()											# 	if channels are active, for sure.
 
+	def OnStartAll(self,e):
+		if(self.acqPanel0.Module):
+			self.acqPanel0.StartClick(e)
+		if(self.acqPanel1.Module):
+			self.acqPanel1.StartClick(e)
+		if(self.acqPanel2.Module):
+			self.acqPanel2.StartClick(e)
+		if(self.acqPanel3.Module):
+			self.acqPanel0.StartClick(e)
 class Plot(wx.Panel):
 	def __init__(self, parent, id = -1, dpi = None, **kwargs):
 		wx.Panel.__init__(self, parent, id=id, **kwargs)
@@ -248,6 +257,8 @@ class Plot(wx.Panel):
 		self.toolbar = Toolbar(self.canvas)
 		self.toolbar.Realize()
 
+		#Start all channels button
+		self.BStartAll = wx.Button(self,label="Start all channels")
 		#Update frequency control
 		self.TBGraphRefreshing =  wx.ToggleButton(self,label="Automatic Update",size=(-1,-1))
 		self.TBGraphRefreshing.SetValue(True)
@@ -256,6 +267,7 @@ class Plot(wx.Panel):
 		sizer = wx.BoxSizer(wx.VERTICAL)
 		toolbarSizer = wx.BoxSizer(wx.HORIZONTAL)
 		toolbarSizer.Add(self.toolbar, 1 , wx.LEFT | wx.EXPAND)
+		toolbarSizer.Add(self.BStartAll,0,wx.RIGHT | wx.EXPAND, border=2)
 		toolbarSizer.Add(self.TBGraphRefreshing,0,wx.RIGHT | wx.EXPAND)
 		toolbarSizer.Add(self.sld_updFreq,0,wx.RIGHT | wx.EXPAND)
 		sizer.Add(self.canvas,1,wx.EXPAND)
