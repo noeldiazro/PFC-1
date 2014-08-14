@@ -241,13 +241,14 @@ class MainFrame(wx.Frame):
 			self.ToggleGraphRefreshing()											# 	if channels are active, for sure.
 
 	def OnStartAll(self,e):
-		if(self.acqPanel0.Module):
+		e.GetEventObject().Disable()
+		if(self.acqPanel0.Module and not self.channel_active[0]):
 			self.acqPanel0.StartClick(e)
-		if(self.acqPanel1.Module):
+		if(self.acqPanel1.Module and not self.channel_active[1]):
 			self.acqPanel1.StartClick(e)
-		if(self.acqPanel2.Module):
+		if(self.acqPanel2.Module and not self.channel_active[2]):
 			self.acqPanel2.StartClick(e)
-		if(self.acqPanel3.Module):
+		if(self.acqPanel3.Module and not self.channel_active[3]):
 			self.acqPanel0.StartClick(e)
 class Plot(wx.Panel):
 	def __init__(self, parent, id = -1, dpi = None, **kwargs):
