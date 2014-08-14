@@ -30,6 +30,8 @@ class AcquisitionGUI(wx.Panel):
 			self.Module = piDA.Acquisition(1,ch0)
 			self.SetStatusLight("green")
 			self.SetStatusText("Ready.")
+			self.mainFrame.channel_has_input[channel_id] = True
+			self.mainFrame.channel_available[channel_id] = True
 		except IndexError:	#Meaning there's no input for this channel.
 			self.ToggleWidgets(False)
 			self.Module=False
@@ -85,6 +87,7 @@ class AcquisitionGUI(wx.Panel):
 		#	Control buttons
 		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
 		self.pauseButton=wx.Button(self,label="Stop")
+		self.pauseButton.Disable()		# You can't stop something that hasn't started.
 		self.startButton=wx.Button(self,label="Start")
 		self.pauseButton.Bind(wx.EVT_BUTTON,self.StopClick)
 		self.startButton.Bind(wx.EVT_BUTTON,self.StartClick)
@@ -211,10 +214,12 @@ class AcquisitionGUI(wx.Panel):
 
 	def StartClick(self,event):
 		self.startButton.Disable()
+		self.simButton.Disable()
 		self.Module.start()
 		self.SetStatusText("Active.")
 		self.SetStatusLight("yellow")
 		self.mainFrame.channel_active[self.channel_id]=True
+		self.mainFrame.channel_available[self.channel_id]=False
 		self.mainFrame.ToggleGraphRefreshing(check_channels=True)
 
 		#Offset calc:
@@ -226,8 +231,11 @@ class AcquisitionGUI(wx.Panel):
 			#print self.time_offset
 		else:
 			self.mainFrame.set_master_module(self.Module)
+		self.pauseButton.Enable()
+		self.mainFrame.disableStartAllButton()
 
-	def StopClick(self,event):
+	def StopClick(self,e):
+		self.ToggleWidgets(False)
 		self.Module.stop()
 		self.mainFrame.channel_active[self.channel_id]=False
 		self.SetStatusLight("yellow")

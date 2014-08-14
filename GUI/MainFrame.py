@@ -25,7 +25,9 @@ class MainFrame(wx.Frame):
 		#Variables used by the graph control
 		self.update_frequency = 5
 		self.autoscale = True
-		self.channel_active = [False,False,False,False]
+		self.channel_has_input = [False, False, False, False]	#Channel has an available input.
+		self.channel_active = [False, False ,False ,False]		#Channel is currently acquiring data.
+		self.channel_available = [False, False, False, False]	#Channel is available to acquire data.
 		self.master_channel = False
 		self.__graphRefreshing=False
 
@@ -178,7 +180,18 @@ class MainFrame(wx.Frame):
 		if not(self.master_channel):
 			self.master_channel=module
 
+	"""
+		Returns if every channel available is active.
+	"""
+	def all_channels_active(self):
+		return sum(self.channel_active)==sum(self.channel_has_input)
 
+	"""
+		Disables StartAll Button if useless
+	"""
+	def disableStartAllButton(self):
+		if self.all_channels_active():
+			self.page.BStartAll.Disable()
 	#							#
 	#	E	V	E	N	T	S	#
 	#							#
@@ -242,13 +255,13 @@ class MainFrame(wx.Frame):
 
 	def OnStartAll(self,e):
 		e.GetEventObject().Disable()
-		if(self.acqPanel0.Module and not self.channel_active[0]):
+		if(self.acqPanel0.Module and not self.channel_active[0] and self.channel_available[0]):
 			self.acqPanel0.StartClick(e)
-		if(self.acqPanel1.Module and not self.channel_active[1]):
+		if(self.acqPanel1.Module and not self.channel_active[1] and self.channel_available[1]):
 			self.acqPanel1.StartClick(e)
-		if(self.acqPanel2.Module and not self.channel_active[2]):
+		if(self.acqPanel2.Module and not self.channel_active[2] and self.channel_available[2]):
 			self.acqPanel2.StartClick(e)
-		if(self.acqPanel3.Module and not self.channel_active[3]):
+		if(self.acqPanel3.Module and not self.channel_active[3] and self.channel_available[3]):
 			self.acqPanel0.StartClick(e)
 class Plot(wx.Panel):
 	def __init__(self, parent, id = -1, dpi = None, **kwargs):
