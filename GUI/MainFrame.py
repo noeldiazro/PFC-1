@@ -7,7 +7,7 @@ import os
 import wx
 import wx.aui
 import matplotlib as mpl
-import GUI.AcquisitionGUI
+import GUI.AcquisitionGUI, GUI.DataGUI
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as Canvas
 from matplotlib.backends.backend_wxagg import NavigationToolbar2Wx as Toolbar
 from threading import Thread
@@ -100,7 +100,7 @@ class MainFrame(wx.Frame):
 		self.acquisitionPage.SetSizer(apshbox)
 
 		self.nb.AddPage(self.acquisitionPage,"Acquisition")
-		self.nb.AddPage(wx.Panel(self),"Data")
+		self.nb.AddPage(GUI.DataGUI.DataGUI(self.acquisitionPage,self),"Data")
 		self.nb.AddPage(wx.Panel(self),"Export")
 
 		hbox1.Add(self.page, 1, flag=wx.EXPAND)
