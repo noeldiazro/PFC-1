@@ -4,5 +4,5 @@
 from GUI.MainFrame import *
 
 app = wx.App(False)
-MainFrame(None, "Aún no hay un nombre para esto")
+MainFrame(None, "piDA Graphic Interface")
 app.MainLoop()

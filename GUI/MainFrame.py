@@ -45,30 +45,24 @@ class MainFrame(wx.Frame):
 		fileMenu = wx.Menu()
 		viewMenu = wx.Menu()
 		helpMenu = wx.Menu()
-		menuOpen = fileMenu.Append(wx.ID_OPEN, "&Abrir"," Abrir una sesión")
-		menuExit = fileMenu.Append(wx.ID_EXIT,"&Salir"," Salir del programa")
+		menuOpen = fileMenu.Append(wx.ID_OPEN, "&Open Session","Open a saved session")
+		menuExit = fileMenu.Append(wx.ID_EXIT,"&Exit","Exit the program")
 		
 		#View menu structure partially DISABLED
 		vm_updateFreqSM = wx.Menu()
-		"""
-		vm_ufsm_fast = vm_updateFreqSM.Append(1, "Rápida (2s)",kind=wx.ITEM_RADIO)
-		vm_ufsm_normal = vm_updateFreqSM.Append(2, "Normal (5s)",kind=wx.ITEM_RADIO).Check()
-		vm_ufsm_slow = vm_updateFreqSM.Append(3, "Lenta (10s)",kind=wx.ITEM_RADIO)
-		vm_ufsm_off = vm_updateFreqSM.Append(4, "Desactivar",kind=wx.ITEM_RADIO)
-		vm_updateFreqSM.AppendSeparator()
-		"""
-		vm_ufsm_autos = vm_updateFreqSM.Append(5, "Autoescalado",kind=wx.ITEM_CHECK).Check()
-		
-		viewMenu.AppendSubMenu(vm_updateFreqSM,"Frecuencia de actualización")
 
-		menuHelp= helpMenu.Append(wx.ID_HELP, "&Ayuda"," Ayuda general")
-		menuAbout= helpMenu.Append(wx.ID_ABOUT, "Acerca &de"," Acerca de este programa")
+		vm_ufsm_autos = vm_updateFreqSM.Append(5, "Autoscale",kind=wx.ITEM_CHECK).Check()
+		
+		viewMenu.AppendSubMenu(vm_updateFreqSM,"Plot settings")
+
+		menuHelp= helpMenu.Append(wx.ID_HELP, "&Help","General help")
+		menuAbout= helpMenu.Append(wx.ID_ABOUT, "&About","About this program")
 
 		# Creating the menubar.
 		menuBar = wx.MenuBar()
-		menuBar.Append(fileMenu,"&Archivo") # Adding the "fileMenu" to the MenuBar
-		menuBar.Append(viewMenu,"&Ver")
-		menuBar.Append(helpMenu,"&A&yuda")
+		menuBar.Append(fileMenu,"&File") # Adding the "fileMenu" to the MenuBar
+		menuBar.Append(viewMenu,"&View")
+		menuBar.Append(helpMenu,"&Help")
 		self.SetMenuBar(menuBar)  # Adding the MenuBar to the Frame content.
 
 
@@ -105,9 +99,9 @@ class MainFrame(wx.Frame):
 		apshbox.Add(self.acqPanel3,1,flag=wx.EXPAND)
 		self.acquisitionPage.SetSizer(apshbox)
 
-		self.nb.AddPage(self.acquisitionPage,"Adquisicion")
-		self.nb.AddPage(wx.Panel(self),"Datos")
-		self.nb.AddPage(wx.Panel(self),"Exportar")
+		self.nb.AddPage(self.acquisitionPage,"Acquisition")
+		self.nb.AddPage(wx.Panel(self),"Data")
+		self.nb.AddPage(wx.Panel(self),"Export")
 
 		hbox1.Add(self.page, 1, flag=wx.EXPAND)
 		hbox2.Add(self.nb,1, flag=wx.EXPAND)
@@ -123,12 +117,6 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.OnOpen, menuOpen)
 		self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 		self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
-		"""
-		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_fast)
-		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_normal)
-		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_slow)
-		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_off)
-		"""
 		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_autos)
 		
 		self.Bind(wx.EVT_BUTTON,self.OnStartAll,self.page.BStartAll)
@@ -169,13 +157,13 @@ class MainFrame(wx.Frame):
 				self.acqPanel2.PushData();
 			if(self.channel_active[3]):
 				self.acqPanel3.PushData();
-			wx.CallAfter(self.__RefreshGraphLoop)
+			wx.CallAfter(self.ReDrawPlot)
 			if self.autoscale:
 				self.axes1.autoscale()
 			if (self.update_frequency>0):
 				time.sleep(self.update_frequency)
 
-	def __RefreshGraphLoop(self):
+	def ReDrawPlot(self):
 		self.page.canvas.draw()
 
 	def set_master_module(self,module):
@@ -204,7 +192,7 @@ class MainFrame(wx.Frame):
 
 	def OnAbout(self,e):
 		# Create a message dialog box
-		dlg = wx.MessageDialog(self, "Proyecto de Final de Carrera \n Diego Muñoz Callejo", "Acerca de", wx.OK)
+		dlg = wx.MessageDialog(self, "End of Degree Project \n Diego Muñoz Callejo, Universidad de Cantabria \n https://github.com/dmcelectrico/PFC", "Acerca de", wx.OK)
 		dlg.ShowModal() # Shows it
 		dlg.Destroy() # finally destroy it when finished.
 
@@ -298,7 +286,7 @@ class MainFrame(wx.Frame):
 			self.acqPanel2.PushData();
 		if(self.acqPanel3.Module and not self.channel_available[3]):
 			self.acqPanel3.PushData();
-		wx.CallAfter(self.__RefreshGraphLoop)
+		wx.CallAfter(self.ReDrawPlot)
 		if self.autoscale:
 			self.axes1.autoscale()
 
