@@ -1,5 +1,6 @@
 # coding=utf-8
 from utils import csv_reader
+import clock
 import time
 import threading
 import classes.Points as Points
@@ -10,6 +11,8 @@ class Simulator:
 		self.status = "No Input"
 		self.stopAcq = False
 		self._data = Points.Points()
+		self.start_time_lock = threading.Lock()
+		self.start_time_lock.acquire()
 		self.LOCK = threading.Lock()
 
 	#Given Python nature this isn't very useful
@@ -22,8 +25,10 @@ class Simulator:
 	def start(self):
 		if(self.csv):
 			print "Acquiring Started"
+			self._start_time = clock.time()
+			self.start_time_lock.release()
 			self.stopAcq = False
-			self.status="Running"
+			self.status="running"
 			t = threading.Thread(target=self.startAcquiring)
 			t.daemon=True
 			t.start()
@@ -32,7 +37,7 @@ class Simulator:
 	def stop(self):
 		self.stopAcq=True
 		print "Acquiring Stopped"
-		self.status="Stopped"
+		self.status="stopped" #This should be a paused status, but we have to fix a lot of things already.
 
 	def get_data(self, n_count=0):
 		p = []
@@ -44,8 +49,12 @@ class Simulator:
 
 	data = property(get_data)
 
-	def get_status():
-		pass
+	# Start Time
+	@property
+	def start_time(self):
+		return self._start_time
+	def get_status(self):
+		return self.status
 
 	"""
 		CSV SPECIFIC FUNCTIONS
