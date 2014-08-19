@@ -131,7 +131,8 @@ class MainFrame(wx.Frame):
 		"""
 		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_autos)
 		
-		self.Bind(wx.EVT_BUTTON,self.OnStartAll)
+		self.Bind(wx.EVT_BUTTON,self.OnStartAll,self.page.BStartAll)
+		self.Bind(wx.EVT_BUTTON,self.OnStopAll,self.page.BStopAll)
 		self.Bind(wx.EVT_SLIDER,self.SetUpdateFrequency,self.page.sld_updFreq)
 		self.Bind(wx.EVT_TOGGLEBUTTON,self.OnTBAutomaticUpdate,self.page.TBGraphRefreshing)
 
@@ -192,6 +193,9 @@ class MainFrame(wx.Frame):
 	def disableStartAllButton(self):
 		if self.all_channels_active():
 			self.page.BStartAll.Disable()
+
+
+
 	#							#
 	#	E	V	E	N	T	S	#
 	#							#
@@ -252,7 +256,9 @@ class MainFrame(wx.Frame):
 		tb=e.GetEventObject()
 		if self.__graphRefreshing != tb.GetValue() and any(self.channel_active):	# We want to enable graph refreshing
 			self.ToggleGraphRefreshing()											# 	if channels are active, for sure.
-
+	"""
+		Starts all available not started channels.
+	"""
 	def OnStartAll(self,e):
 		e.GetEventObject().Disable()
 		if(self.acqPanel0.Module and not self.channel_active[0] and self.channel_available[0]):
@@ -263,6 +269,22 @@ class MainFrame(wx.Frame):
 			self.acqPanel2.StartClick(e)
 		if(self.acqPanel3.Module and not self.channel_active[3] and self.channel_available[3]):
 			self.acqPanel0.StartClick(e)
+
+	"""
+		Stops all active channels.
+	"""
+	def OnStopAll(self,e):
+		
+		if(self.acqPanel0.Module and self.channel_active[0]):
+			self.acqPanel0.StopClick(e)
+		if(self.acqPanel1.Module and self.channel_active[1]):
+			self.acqPanel1.StopClick(e)
+		if(self.acqPanel2.Module and self.channel_active[2]):
+			self.acqPanel2.StopClick(e)
+		if(self.acqPanel3.Module and self.channel_active[3]):
+			self.acqPanel0.StopClick(e)
+
+	
 class Plot(wx.Panel):
 	def __init__(self, parent, id = -1, dpi = None, **kwargs):
 		wx.Panel.__init__(self, parent, id=id, **kwargs)
@@ -272,7 +294,8 @@ class Plot(wx.Panel):
 		self.toolbar.Realize()
 
 		#Start all channels button
-		self.BStartAll = wx.Button(self,label="Start all channels")
+		self.BStartAll = wx.BitmapButton(self,-1,wx.Image("./graphics/start-button.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.BStopAll = wx.BitmapButton(self,-1,wx.Image("./graphics/stop-button.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		#Update frequency control
 		self.TBGraphRefreshing =  wx.ToggleButton(self,label="Automatic Update",size=(-1,-1))
 		self.TBGraphRefreshing.SetValue(True)
@@ -280,10 +303,11 @@ class Plot(wx.Panel):
 
 		sizer = wx.BoxSizer(wx.VERTICAL)
 		toolbarSizer = wx.BoxSizer(wx.HORIZONTAL)
-		toolbarSizer.Add(self.toolbar, 1 , wx.LEFT | wx.EXPAND)
-		toolbarSizer.Add(self.BStartAll,0,wx.RIGHT | wx.EXPAND, border=2)
-		toolbarSizer.Add(self.TBGraphRefreshing,0,wx.RIGHT | wx.EXPAND)
-		toolbarSizer.Add(self.sld_updFreq,0,wx.RIGHT | wx.EXPAND)
+		toolbarSizer.Add(self.toolbar, 1 , wx.ALL | wx.EXPAND)
+		toolbarSizer.Add(self.BStopAll,0,wx.ALL | wx.EXPAND, border=1)
+		toolbarSizer.Add(self.BStartAll,0,wx.ALL | wx.EXPAND, border=1)
+		toolbarSizer.Add(self.TBGraphRefreshing,0,wx.ALL | wx.EXPAND, border=1)
+		toolbarSizer.Add(self.sld_updFreq,0,wx.ALL | wx.EXPAND, border=1)
 		sizer.Add(self.canvas,1,wx.EXPAND)
 		sizer.Add(toolbarSizer,0,wx.EXPAND)
 		self.SetSizer(sizer)
