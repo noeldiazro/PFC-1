@@ -133,6 +133,7 @@ class MainFrame(wx.Frame):
 		
 		self.Bind(wx.EVT_BUTTON,self.OnStartAll,self.page.BStartAll)
 		self.Bind(wx.EVT_BUTTON,self.OnStopAll,self.page.BStopAll)
+		self.Bind(wx.EVT_BUTTON,self.OnRefreshAll,self.page.BRefreshAll)
 		self.Bind(wx.EVT_SLIDER,self.SetUpdateFrequency,self.page.sld_updFreq)
 		self.Bind(wx.EVT_TOGGLEBUTTON,self.OnTBAutomaticUpdate,self.page.TBGraphRefreshing)
 
@@ -284,7 +285,23 @@ class MainFrame(wx.Frame):
 		if(self.acqPanel3.Module and self.channel_active[3]):
 			self.acqPanel0.StopClick(e)
 
-	
+	"""
+		Pulls data from the modules and immediately prints it on the plot.
+	"""
+	def OnRefreshAll(self,e):
+		# Pushes data for each channel if active:
+		if(self.acqPanel0.Module and not self.channel_available[0]):
+			self.acqPanel0.PushData();
+		if(self.acqPanel1.Module and not self.channel_available[1]):
+			self.acqPanel1.PushData();
+		if(self.acqPanel2.Module and not self.channel_available[2]):
+			self.acqPanel2.PushData();
+		if(self.acqPanel3.Module and not self.channel_available[3]):
+			self.acqPanel3.PushData();
+		wx.CallAfter(self.__RefreshGraphLoop)
+		if self.autoscale:
+			self.axes1.autoscale()
+
 class Plot(wx.Panel):
 	def __init__(self, parent, id = -1, dpi = None, **kwargs):
 		wx.Panel.__init__(self, parent, id=id, **kwargs)
@@ -296,6 +313,7 @@ class Plot(wx.Panel):
 		#Start all channels button
 		self.BStartAll = wx.BitmapButton(self,-1,wx.Image("./graphics/start-button.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		self.BStopAll = wx.BitmapButton(self,-1,wx.Image("./graphics/stop-button.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.BRefreshAll = wx.BitmapButton(self,-1,wx.Image("./graphics/refresh-button.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap())
 		#Update frequency control
 		self.TBGraphRefreshing =  wx.ToggleButton(self,label="Automatic Update",size=(-1,-1))
 		self.TBGraphRefreshing.SetValue(True)
@@ -304,6 +322,7 @@ class Plot(wx.Panel):
 		sizer = wx.BoxSizer(wx.VERTICAL)
 		toolbarSizer = wx.BoxSizer(wx.HORIZONTAL)
 		toolbarSizer.Add(self.toolbar, 1 , wx.ALL | wx.EXPAND)
+		toolbarSizer.Add(self.BRefreshAll,0,wx.ALL | wx.EXPAND, border=1)
 		toolbarSizer.Add(self.BStopAll,0,wx.ALL | wx.EXPAND, border=1)
 		toolbarSizer.Add(self.BStartAll,0,wx.ALL | wx.EXPAND, border=1)
 		toolbarSizer.Add(self.TBGraphRefreshing,0,wx.ALL | wx.EXPAND, border=1)
