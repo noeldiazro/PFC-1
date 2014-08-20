@@ -105,7 +105,8 @@ class DataGUI(wx.Panel):
 		elif(e.GetId()==3):
 			for x in self.mainFrame.acqPanel3.Module.get_data(-self.LCch3.GetItemCount()):
 				self.LCch3.Append(x)
-
+		else:
+			self.OnUpdateAll(e)
 
 
 class CustomListCtrl(wx.ListCtrl, ListCtrlAutoWidthMixin):
