@@ -99,8 +99,11 @@ class MainFrame(wx.Frame):
 		apshbox.Add(self.acqPanel3,1,flag=wx.EXPAND)
 		self.acquisitionPage.SetSizer(apshbox)
 
+		self.DataPage = GUI.DataGUI.DataGUI(self.acquisitionPage,self)
+		self.InitDataGUI()
+
 		self.nb.AddPage(self.acquisitionPage,"Acquisition")
-		self.nb.AddPage(GUI.DataGUI.DataGUI(self.acquisitionPage,self),"Data")
+		self.nb.AddPage(self.DataPage,"Data")
 		self.nb.AddPage(wx.Panel(self),"Export")
 
 		hbox1.Add(self.page, 1, flag=wx.EXPAND)
@@ -124,6 +127,20 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON,self.OnRefreshAll,self.page.BRefreshAll)
 		self.Bind(wx.EVT_SLIDER,self.SetUpdateFrequency,self.page.sld_updFreq)
 		self.Bind(wx.EVT_TOGGLEBUTTON,self.OnTBAutomaticUpdate,self.page.TBGraphRefreshing)
+
+	"""
+		Initializes DataGUI
+	"""
+	def InitDataGUI(self):
+		if(not self.channel_has_input[0]):
+			self.DataPage.LCch0.Disable()
+		if(not self.channel_has_input[1]):
+			self.DataPage.LCch1.Disable()
+		if(not self.channel_has_input[2]):
+			self.DataPage.LCch2.Disable()
+		if(not self.channel_has_input[3]):
+			self.DataPage.LCch3.Disable()
+
 
 	"""
 		Graph refreshing. 
