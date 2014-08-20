@@ -22,8 +22,17 @@ class DataGUI(wx.Panel):
 
 
 		#First column (Buttons)
-		self.BRefreshAllData = wx.BitmapButton(self,-1,wx.Image("./graphics/refresh-button.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.BRefreshAllData = wx.BitmapButton(self,-1,wx.Image("./graphics/refresh-data-all.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.BRefreshCh0Data = wx.BitmapButton(self,0,wx.Image("./graphics/refresh-data-ch0.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.BRefreshCh1Data = wx.BitmapButton(self,1,wx.Image("./graphics/refresh-data-ch1.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.BRefreshCh2Data = wx.BitmapButton(self,2,wx.Image("./graphics/refresh-data-ch2.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		self.BRefreshCh3Data = wx.BitmapButton(self,3,wx.Image("./graphics/refresh-data-ch3.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap())
+		
 		vbox1.Add(self.BRefreshAllData)
+		vbox1.Add(self.BRefreshCh0Data)
+		vbox1.Add(self.BRefreshCh1Data)
+		vbox1.Add(self.BRefreshCh2Data)
+		vbox1.Add(self.BRefreshCh3Data)
 
 
 		#Second column
@@ -59,6 +68,7 @@ class DataGUI(wx.Panel):
 		self.SetSizer(hbox)
 
 		self.Bind(wx.EVT_BUTTON,self.OnUpdateAll,self.BRefreshAllData)
+		self.Bind(wx.EVT_BUTTON,self.OnUpdateChannel)
 
 
 		# # # # # # # # # # # # # #	#
@@ -82,6 +92,19 @@ class DataGUI(wx.Panel):
 			for x in self.mainFrame.acqPanel3.Module.get_data(-self.LCch3.GetItemCount()):
 				self.LCch3.Append(x)
 
+	def OnUpdateChannel(self,e):
+		if(e.GetId()==0):
+			for x in self.mainFrame.acqPanel0.Module.get_data(-self.LCch0.GetItemCount()):
+				self.LCch0.Append(x)
+		elif(e.GetId()==1):
+			for x in self.mainFrame.acqPanel1.Module.get_data(-self.LCch1.GetItemCount()):
+				self.LCch1.Append(x)
+		elif(e.GetId()==2):
+			for x in self.mainFrame.acqPanel2.Module.get_data(-self.LCch2.GetItemCount()):
+				self.LCch2.Append(x)
+		elif(e.GetId()==3):
+			for x in self.mainFrame.acqPanel3.Module.get_data(-self.LCch3.GetItemCount()):
+				self.LCch3.Append(x)
 
 
 

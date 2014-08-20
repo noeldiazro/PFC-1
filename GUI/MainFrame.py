@@ -134,12 +134,16 @@ class MainFrame(wx.Frame):
 	def InitDataGUI(self):
 		if(not self.channel_has_input[0]):
 			self.DataPage.LCch0.Disable()
+			self.DataPage.BRefreshCh0Data.Disable()
 		if(not self.channel_has_input[1]):
 			self.DataPage.LCch1.Disable()
+			self.DataPage.BRefreshCh1Data.Disable()
 		if(not self.channel_has_input[2]):
 			self.DataPage.LCch2.Disable()
+			self.DataPage.BRefreshCh2Data.Disable()
 		if(not self.channel_has_input[3]):
 			self.DataPage.LCch3.Disable()
+			self.DataPage.BRefreshCh3Data.Disable()
 
 
 	"""
