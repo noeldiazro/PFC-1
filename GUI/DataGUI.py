@@ -58,6 +58,30 @@ class DataGUI(wx.Panel):
 		hbox.Add(vbox5,1,flag=wx.EXPAND | wx.ALL,border=2)
 		self.SetSizer(hbox)
 
+		self.Bind(wx.EVT_BUTTON,self.OnUpdateAll,self.BRefreshAllData)
+
+
+		# # # # # # # # # # # # # #	#
+		#							#
+		#	E	V	E	N	T	S	#
+		#							#
+		# # # # # # # # # # # # # #	#
+
+
+	def OnUpdateAll(self,e):
+		if(self.mainFrame.channel_has_input[0]):
+			for x in self.mainFrame.acqPanel0.Module.get_data(-self.LCch0.GetItemCount()):
+				self.LCch0.Append(x)
+		if(self.mainFrame.channel_has_input[1]):
+			for x in self.mainFrame.acqPanel1.Module.get_data(-self.LCch1.GetItemCount()):
+				self.LCch1.Append(x)
+		if(self.mainFrame.channel_has_input[2]):
+			for x in self.mainFrame.acqPanel2.Module.get_data(-self.LCch2.GetItemCount()):
+				self.LCch2.Append(x)
+		if(self.mainFrame.channel_has_input[3]):
+			for x in self.mainFrame.acqPanel3.Module.get_data(-self.LCch3.GetItemCount()):
+				self.LCch3.Append(x)
+
 
 
 
@@ -65,4 +89,5 @@ class CustomListCtrl(wx.ListCtrl, ListCtrlAutoWidthMixin):
 	def __init__(self, parent):
 		wx.ListCtrl.__init__(self, parent, -1, style=wx.LC_REPORT)
 		ListCtrlAutoWidthMixin.__init__(self)
+		self.setResizeColumn(0)
 		
