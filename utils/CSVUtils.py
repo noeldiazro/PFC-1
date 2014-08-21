@@ -42,7 +42,7 @@ class Writer:
 		A CSV writer which will write rows to CSV file "f",
 		which is encoded in the given encoding.
 		Source: https://docs.python.org/2/library/csv.html
-		Modified by Diego Muñoz to accept a filepath instead of a stream
+		Modified by Diego Muñoz to accept a filepath instead of a filestream
 	"""
 
 	def __init__(self, filepath, dialect=csv.excel, encoding="utf-8", **kwds):
