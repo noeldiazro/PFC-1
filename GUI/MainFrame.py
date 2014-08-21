@@ -78,8 +78,8 @@ class MainFrame(wx.Frame):
 		# EXAMPLE PLOT
 		self.page = Plot(self)
 		self.axes1 = self.page.figure.gca()
+		self.axes1.set_xlabel("t (s)")
 		#
-		
 
 		## hbox2
 
@@ -132,10 +132,8 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_SLIDER,self.SetUpdateFrequency,self.page.sld_updFreq)
 		self.Bind(wx.EVT_TOGGLEBUTTON,self.OnTBAutomaticUpdate,self.page.TBGraphRefreshing)
 
-	"""
-		Initializes DataGUI
-	"""
 	def InitDataGUI(self):
+		"""	Initializes DataGUI."""
 		if(not self.channel_has_input[0]):
 			self.DataPage.LCch0.Disable()
 			self.DataPage.BRefreshCh0Data.Disable()
@@ -150,10 +148,9 @@ class MainFrame(wx.Frame):
 			self.DataPage.BRefreshCh3Data.Disable()
 
 
-	"""
-		Graph refreshing. 
-	"""
 	def ToggleGraphRefreshing(self,check_channels=False):
+		"""	Toggles automatic graph refreshing with an option to check if there are channels still active. """
+
 		# We don't want to stop the graph refreshing if the call comes from a stopping channel
 		#	and there are other channels still active.
 		if(check_channels and any(self.channel_active) and self.__graphRefreshing):
@@ -172,6 +169,7 @@ class MainFrame(wx.Frame):
 			self.statusbar.PushStatusText("Graph Refreshing ON.")
 
 	def RefreshGraphLoop(self):
+		"""Loop implementing every channel data pulling, plot redrawing and autoscale calling"""
 		while (self.__graphRefreshing):
 			# Pushes data for each channel if active:
 			if(self.channel_active[0]):
@@ -189,26 +187,35 @@ class MainFrame(wx.Frame):
 				time.sleep(self.update_frequency)
 
 	def ReDrawPlot(self):
+		"""Invokes plot redrawing"""
 		self.page.canvas.draw()
 
+	def set_xlabel(self,label):
+		"""Sets the plot x axis label"""
+		self.axes1.set_xlabel(label)
+
+	def set_ylabel(self,label):
+		"""Sets the plot y axis label"""
+		self.axes1.set_ylabel(label)
+
+	def set_plot_title(self,title):
+		"""Sets the plot title"""
+		self.axes1.set_title(title)
+
 	def set_master_module(self,module):
+		"""Sets the master module, usually the module which started first"""
 		if not(self.master_channel):
 			self.master_channel=module
 
-	"""
-		Returns if every channel available is active.
-	"""
+
 	def all_channels_active(self):
+		"""Returns if every channel available is active."""
 		return sum(self.channel_active)==sum(self.channel_has_input)
 
-	"""
-		Disables StartAll Button if useless
-	"""
 	def disableStartAllButton(self):
+		"""Disables StartAll Button if useless"""
 		if self.all_channels_active():
 			self.page.BStartAll.Disable()
-
-
 
 	#							#
 	#	E	V	E	N	T	S	#
@@ -263,17 +270,15 @@ class MainFrame(wx.Frame):
 		if any(self.channel_active) and not self.__graphRefreshing:
 			self.ToggleGraphRefreshing()
 
-	"""
-		ToggleButton for enabling/disabling auto graph refreshing.
-	"""
+
 	def OnTBAutomaticUpdate(self,e):
+		"""ToggleButton for enabling/disabling auto graph refreshing."""
 		tb=e.GetEventObject()
 		if self.__graphRefreshing != tb.GetValue() and any(self.channel_active):	# We want to enable graph refreshing
 			self.ToggleGraphRefreshing()											# 	if channels are active, for sure.
-	"""
-		Starts all available not started channels.
-	"""
+	
 	def OnStartAll(self,e):
+		"""Starts all available not started channels."""
 		e.GetEventObject().Disable()
 		if(self.acqPanel0.Module and not self.channel_active[0] and self.channel_available[0]):
 			self.acqPanel0.StartClick(e)
@@ -284,11 +289,9 @@ class MainFrame(wx.Frame):
 		if(self.acqPanel3.Module and not self.channel_active[3] and self.channel_available[3]):
 			self.acqPanel0.StartClick(e)
 
-	"""
-		Stops all active channels.
-	"""
+	
 	def OnStopAll(self,e):
-		
+		"""	Stops all active channels."""	
 		if(self.acqPanel0.Module and self.channel_active[0]):
 			self.acqPanel0.StopClick(e)
 		if(self.acqPanel1.Module and self.channel_active[1]):
@@ -298,10 +301,9 @@ class MainFrame(wx.Frame):
 		if(self.acqPanel3.Module and self.channel_active[3]):
 			self.acqPanel0.StopClick(e)
 
-	"""
-		Pulls data from the modules and immediately prints it on the plot.
-	"""
 	def OnRefreshAll(self,e):
+		"""	Pulls data from the modules and immediately prints it on the plot."""
+
 		# Pushes data for each channel if active:
 		if(self.acqPanel0.Module and not self.channel_available[0]):
 			self.acqPanel0.PushData();
@@ -316,6 +318,7 @@ class MainFrame(wx.Frame):
 			self.axes1.autoscale()
 
 class Plot(wx.Panel):
+	"""Graph panel"""
 	def __init__(self, parent, id = -1, dpi = None, **kwargs):
 		wx.Panel.__init__(self, parent, id=id, **kwargs)
 		self.figure = mpl.figure.Figure(dpi=dpi, figsize=(2,2))
