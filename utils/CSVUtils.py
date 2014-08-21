@@ -3,6 +3,7 @@
 import csv
 import numpy
 import classes.Points as Points
+import csv, codecs, cStringIO
 
 class Reader:
 
@@ -36,9 +37,34 @@ class Reader:
 
 			#print "Terminado. Elementos: "+str(self.p.length())
 
-class Writer(object):
-	"""docstring for Writer"""
-	def __init__(self, arg):
-		super(Writer, self).__init__()
-		self.arg = arg
+class Writer:
+	"""
+		A CSV writer which will write rows to CSV file "f",
+		which is encoded in the given encoding.
+		Source: https://docs.python.org/2/library/csv.html
+		Modified by Diego Muñoz to accept a filepath instead of a stream
+	"""
+
+	def __init__(self, filepath, dialect=csv.excel, encoding="utf-8", **kwds):
+		# Redirect output to a queue
+		self.queue = cStringIO.StringIO()
+		self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+		self.stream = open(filepath, 'wb')
+		self.encoder = codecs.getincrementalencoder(encoding)()
+
+	def writerow(self, row):
+		self.writer.writerow([str(s).encode("utf-8") for s in row])
+		# Fetch UTF-8 output from the queue ...
+		data = self.queue.getvalue()
+		data = data.decode("utf-8")
+		# ... and reencode it into the target encoding
+		data = self.encoder.encode(data)
+		# write to the target stream
+		self.stream.write(data)
+		# empty queue
+		self.queue.truncate(0)
+
+	def writerows(self, rows):
+		for row in rows:
+			self.writerow(row)
 		
