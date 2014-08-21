@@ -6,7 +6,6 @@ from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin
 class DataGUI(wx.Panel):
 	def __init__(self, parent, mainFrame):
 		super(DataGUI,self).__init__(parent,style=wx.NO_BORDER)
-		self.parent=parent
 		self.mainFrame=mainFrame
 		self.InitUI(parent)
 

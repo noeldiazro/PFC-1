@@ -36,3 +36,9 @@ class Reader:
 
 			#print "Terminado. Elementos: "+str(self.p.length())
 
+class Writer(object):
+	"""docstring for Writer"""
+	def __init__(self, arg):
+		super(Writer, self).__init__()
+		self.arg = arg
+		

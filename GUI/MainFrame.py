@@ -7,7 +7,9 @@ import os
 import wx
 import wx.aui
 import matplotlib as mpl
-import GUI.AcquisitionGUI, GUI.DataGUI
+from GUI.AcquisitionGUI import AcquisitionGUI
+from GUI.DataGUI import DataGUI
+from GUI.ExportGUI import ExportGUI
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as Canvas
 from matplotlib.backends.backend_wxagg import NavigationToolbar2Wx as Toolbar
 from threading import Thread
@@ -89,22 +91,24 @@ class MainFrame(wx.Frame):
 		apshbox = wx.BoxSizer(wx.HORIZONTAL)
 
 
-		self.acqPanel0 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,self,0)
-		self.acqPanel1 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,self,1)
-		self.acqPanel2 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,self,2)
-		self.acqPanel3 = GUI.AcquisitionGUI.AcquisitionGUI(self.acquisitionPage,self,3)
+		self.acqPanel0 = AcquisitionGUI(self.acquisitionPage,self,0)
+		self.acqPanel1 = AcquisitionGUI(self.acquisitionPage,self,1)
+		self.acqPanel2 = AcquisitionGUI(self.acquisitionPage,self,2)
+		self.acqPanel3 = AcquisitionGUI(self.acquisitionPage,self,3)
 		apshbox.Add(self.acqPanel0,1,flag=wx.EXPAND)
 		apshbox.Add(self.acqPanel1,1,flag=wx.EXPAND)
 		apshbox.Add(self.acqPanel2,1,flag=wx.EXPAND)
 		apshbox.Add(self.acqPanel3,1,flag=wx.EXPAND)
 		self.acquisitionPage.SetSizer(apshbox)
 
-		self.DataPage = GUI.DataGUI.DataGUI(self.acquisitionPage,self)
+		self.DataPage = DataGUI(self.nb,self)
 		self.InitDataGUI()
+
+		self.ExportPage = ExportGUI(self.nb,self)
 
 		self.nb.AddPage(self.acquisitionPage,"Acquisition")
 		self.nb.AddPage(self.DataPage,"Data")
-		self.nb.AddPage(wx.Panel(self),"Export")
+		self.nb.AddPage(self.ExportPage,"Export")
 
 		hbox1.Add(self.page, 1, flag=wx.EXPAND)
 		hbox2.Add(self.nb,1, flag=wx.EXPAND)
