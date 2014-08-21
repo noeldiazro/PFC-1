@@ -13,10 +13,10 @@ class DataGUI(wx.Panel):
 	def InitUI(self,parent):
 		hbox = wx.BoxSizer(wx.HORIZONTAL)	# horizonal layout
 		vbox1 = wx.BoxSizer(wx.VERTICAL) 	#first column (buttons)
-		vbox2 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, "Channel #0:"), orient=wx.VERTICAL) 	#second column
-		vbox3 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, "Channel #1:"), orient=wx.VERTICAL)		#third column
-		vbox4 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, "Channel #2:"), orient=wx.VERTICAL) 	#fourth column
-		vbox5 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, "Channel #3:"), orient=wx.VERTICAL) 	#fifth column
+		vbox2 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, " Channel #0:"), orient=wx.VERTICAL) 	#second column
+		vbox3 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, " Channel #1:"), orient=wx.VERTICAL)		#third column
+		vbox4 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, " Channel #2:"), orient=wx.VERTICAL) 	#fourth column
+		vbox5 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, " Channel #3:"), orient=wx.VERTICAL) 	#fifth column
 
 
 
@@ -60,10 +60,10 @@ class DataGUI(wx.Panel):
 		vbox5.Add(self.LCch3,1,flag=wx.EXPAND)
 
 		hbox.Add(vbox1)
-		hbox.Add(vbox2,1,flag=wx.EXPAND | wx.ALL,border=2)
-		hbox.Add(vbox3,1,flag=wx.EXPAND | wx.ALL,border=2)
-		hbox.Add(vbox4,1,flag=wx.EXPAND | wx.ALL,border=2)
-		hbox.Add(vbox5,1,flag=wx.EXPAND | wx.ALL,border=2)
+		hbox.Add(vbox2,1,flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.DOWN,border=2)
+		hbox.Add(vbox3,1,flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.DOWN,border=2)
+		hbox.Add(vbox4,1,flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.DOWN,border=2)
+		hbox.Add(vbox5,1,flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.DOWN,border=2)
 		self.SetSizer(hbox)
 
 		self.Bind(wx.EVT_BUTTON,self.OnUpdateAll,self.BRefreshAllData)
