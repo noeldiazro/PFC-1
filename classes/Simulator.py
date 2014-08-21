@@ -1,5 +1,5 @@
 # coding=utf-8
-from utils import csv_reader
+from utils import CSVUtils
 import clock
 import time
 import threading
@@ -60,11 +60,11 @@ class Simulator:
 		CSV SPECIFIC FUNCTIONS
 	"""
 	def setFileInput(self,filePath):
-		self.csv = csv_reader.csv_reader(filePath)
-		print self.csv.strTitle
+		self.csv = CSVUtils.Reader(filePath)
+		#print self.csv.strTitle
 
 	def startAcquiring(self):
-		print "delay:"+str(1.0/self.sampling_rate)
+		#print "delay:"+str(1.0/self.sampling_rate)
 		while(not self.stopAcq):
 			try:
 				tmp=self.csv.p.next()
