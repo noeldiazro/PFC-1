@@ -102,7 +102,6 @@ class MainFrame(wx.Frame):
 		self.acquisitionPage.SetSizer(apshbox)
 
 		self.DataPage = DataGUI(self.nb,self)
-		self.InitDataGUI()
 
 		self.ExportPage = ExportGUI(self.nb,self)
 
@@ -132,8 +131,11 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_SLIDER,self.SetUpdateFrequency,self.page.sld_updFreq)
 		self.Bind(wx.EVT_TOGGLEBUTTON,self.OnTBAutomaticUpdate,self.page.TBGraphRefreshing)
 
-	def InitDataGUI(self):
-		"""	Initializes DataGUI."""
+		#Updates GUI channel inputs.
+		self.UpdateChannelInputs()
+
+	def UpdateChannelInputs(self):
+		"""	Updates GUI elements according to the available inputs"""
 		if(not self.channel_has_input[0]):
 			self.DataPage.LCch0.Disable()
 			self.DataPage.BRefreshCh0Data.Disable()
@@ -194,13 +196,24 @@ class MainFrame(wx.Frame):
 		"""Sets the plot x axis label"""
 		self.axes1.set_xlabel(label)
 
+	def get_xlabel(self):
+		"""Gets the plot x axis label"""
+		return self.axes1.get_xlabel()
+
 	def set_ylabel(self,label):
 		"""Sets the plot y axis label"""
 		self.axes1.set_ylabel(label)
+	def get_ylabel(self):
+		"""Gets the plot y axis label"""
+		return self.axes1.get_ylabel()
 
 	def set_plot_title(self,title):
 		"""Sets the plot title"""
 		self.axes1.set_title(title)
+
+	def get_plot_title(self):
+		"""Gets the plot title"""
+		return self.axes1.get_title()
 
 	def set_master_module(self,module):
 		"""Sets the master module, usually the module which started first"""
