@@ -120,10 +120,10 @@ class MainFrame(wx.Frame):
 
 
 		# Events.
-		self.Bind(wx.EVT_MENU, self.OnOpen, menuOpen)
+		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_autos)
+		#self.Bind(wx.EVT_MENU, self.OnOpen, menuOpen)
 		self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 		self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
-		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_autos)
 		
 		self.Bind(wx.EVT_BUTTON,self.OnStartAll,self.page.BStartAll)
 		self.Bind(wx.EVT_BUTTON,self.OnStopAll,self.page.BStopAll)
