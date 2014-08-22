@@ -135,19 +135,18 @@ class MainFrame(wx.Frame):
 		self.UpdateChannelInputs()
 
 	def UpdateChannelInputs(self):
-		"""	Updates GUI elements according to the available inputs"""
-		if(not self.channel_has_input[0]):
-			self.DataPage.LCch0.Disable()
-			self.DataPage.BRefreshCh0Data.Disable()
-		if(not self.channel_has_input[1]):
-			self.DataPage.LCch1.Disable()
-			self.DataPage.BRefreshCh1Data.Disable()
-		if(not self.channel_has_input[2]):
-			self.DataPage.LCch2.Disable()
-			self.DataPage.BRefreshCh2Data.Disable()
-		if(not self.channel_has_input[3]):
-			self.DataPage.LCch3.Disable()
-			self.DataPage.BRefreshCh3Data.Disable()
+		"""	Updates GUI elements according to the available inputs using UpdateChannelWidgets function in each case"""
+		self.DataPage.UpdateChannelWidgets(0,self.channel_has_input[0])
+		self.ExportPage.UpdateChannelWidgets(0,self.channel_has_input[0])
+
+		self.DataPage.UpdateChannelWidgets(1,self.channel_has_input[1])
+		self.ExportPage.UpdateChannelWidgets(1,self.channel_has_input[1])
+
+		self.DataPage.UpdateChannelWidgets(2,self.channel_has_input[2])
+		self.ExportPage.UpdateChannelWidgets(2,self.channel_has_input[2])
+
+		self.DataPage.UpdateChannelWidgets(3,self.channel_has_input[3])
+		self.ExportPage.UpdateChannelWidgets(3,self.channel_has_input[3])
 
 
 	def ToggleGraphRefreshing(self,check_channels=False):

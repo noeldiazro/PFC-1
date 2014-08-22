@@ -70,6 +70,41 @@ class DataGUI(wx.Panel):
 		self.Bind(wx.EVT_BUTTON,self.OnUpdateChannel)
 
 
+	def UpdateChannelWidgets(self,channel,enable):
+		if(channel==0):
+			if(enable):
+				self.LCch0.Enable()
+				self.BRefreshCh0Data.Enable()
+			else:
+				self.LCch0.Disable()
+				self.BRefreshCh0Data.Disable()
+		elif(channel==1):
+			if(enable):
+				self.LCch1.Enable()
+				self.BRefreshCh1Data.Enable()
+			else:
+				self.LCch1.Disable()
+				self.BRefreshCh1Data.Disable()
+
+		elif(channel==2):
+			if(enable):
+				self.LCch2.Enable()
+				self.BRefreshCh2Data.Enable()
+			else:
+				self.LCch2.Disable()
+				self.BRefreshCh2Data.Disable()
+
+		elif(channel==3):
+			if(enable):
+				self.LCch3.Enable()
+				self.BRefreshCh3Data.Enable()
+			else:
+				self.LCch3.Disable()
+				self.BRefreshCh3Data.Disable()
+
+
+
+
 		# # # # # # # # # # # # # #	#
 		#							#
 		#	E	V	E	N	T	S	#
