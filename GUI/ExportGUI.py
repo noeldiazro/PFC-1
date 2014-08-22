@@ -149,7 +149,33 @@ class ExportGUI(wx.Panel):
 		vbox4.Add(hbox44,flag=wx.ALIGN_CENTER | wx.ALL,border=1)
 
 		#Last row
-		hbox5.Add(wx.Button(self,-1,"ojete"))
+
+		self.BcsvAll = wx.Button(self,-1,"Export to CSV")
+		self.BpdfAll = wx.Button(self,-1,"Export to PDF")
+
+		self.cbCh0 = wx.CheckBox(self,label="Ch0")
+		self.cbCh1 = wx.CheckBox(self,label="Ch1")
+		self.cbCh2 = wx.CheckBox(self,label="Ch2")
+		self.cbCh3 = wx.CheckBox(self,label="Ch3")
+
+		self.cbCh0.SetValue(True)
+		self.cbCh1.SetValue(True)
+		self.cbCh2.SetValue(True)
+		self.cbCh3.SetValue(True)
+
+		self.CBXMerge = wx.ComboBox(self, choices=["s (1)","ms (0.001)","ns (0.00001)","us (0.000000001)"],style=wx.CB_READONLY,size=wx.Size(100, 20))
+		self.CBXMerge.SetSelection(0)
+
+		hbox5.Add(wx.StaticText(self,label="Select channels: "),flag=wx.ALIGN_CENTER | wx.ALL,border=1)
+		hbox5.Add(self.cbCh0,flag=wx.ALIGN_CENTER | wx.ALL,border=1)
+		hbox5.Add(self.cbCh1,flag=wx.ALIGN_CENTER | wx.ALL,border=1)
+		hbox5.Add(self.cbCh2,flag=wx.ALIGN_CENTER | wx.ALL,border=1)
+		hbox5.Add(self.cbCh3,flag=wx.ALIGN_CENTER | wx.ALL,border=1)
+		hbox5.Add(self.CBXMerge,flag=wx.ALIGN_CENTER | wx.ALL,border=1)
+		hbox5.Add(self.BcsvAll,flag=wx.ALIGN_CENTER | wx.ALL,border=3)
+		hbox5.Add(self.BpdfAll,flag=wx.ALIGN_CENTER | wx.ALL,border=3)
+
+		# Sizers
 
 		hbox.Add(vbox1,1,flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.DOWN,border=2)
 		hbox.Add(vbox2,1,flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.DOWN,border=2)
@@ -157,7 +183,7 @@ class ExportGUI(wx.Panel):
 		hbox.Add(vbox4,1,flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.DOWN,border=2)
 
 		vbox.Add(hbox,1,flag=wx.EXPAND)
-		vbox.Add(hbox5,0,flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.DOWN,border=2)
+		vbox.Add(hbox5,0,flag=wx.ALIGN_CENTER | wx.LEFT | wx.RIGHT | wx.DOWN,border=2)
 		self.SetSizer(vbox)
 
 		#Bindings
@@ -188,12 +214,15 @@ class ExportGUI(wx.Panel):
 				self.TCy1Label.Enable()
 				self.BcsvCh0.Enable()
 				self.BpdfCh0.Enable()
+				self.cbCh0.Enable()
 			else:
 				self.TC1title.Disable()
 				self.TCx1Label.Disable()
 				self.TCy1Label.Disable()
 				self.BcsvCh0.Disable()
 				self.BpdfCh0.Disable()
+				self.cbCh0.SetValue(False)
+				self.cbCh0.Disable()
 		elif(channel==1):
 			if(enable):
 				self.TC2title.Enable()
@@ -201,12 +230,15 @@ class ExportGUI(wx.Panel):
 				self.TCy2Label.Enable()
 				self.BcsvCh1.Enable()
 				self.BpdfCh1.Enable()
+				self.cbCh1.Enable()
 			else:
 				self.TC2title.Disable()
 				self.TCx2Label.Disable()
 				self.TCy2Label.Disable()
 				self.BcsvCh1.Disable()
 				self.BpdfCh1.Disable()
+				self.cbCh1.SetValue(False)
+				self.cbCh1.Disable()
 		elif(channel==2):
 			if(enable):
 				self.TC3title.Enable()
@@ -214,12 +246,15 @@ class ExportGUI(wx.Panel):
 				self.TCy3Label.Enable()
 				self.BcsvCh2.Enable()
 				self.BpdfCh2.Enable()
+				self.cbCh2.Enable()
 			else:
 				self.TC3title.Disable()
 				self.TCx3Label.Disable()
 				self.TCy3Label.Disable()
 				self.BcsvCh2.Disable()
 				self.BpdfCh2.Disable()
+				self.cbCh2.SetValue(False)
+				self.cbCh2.Disable()
 		elif(channel==3):
 			if(enable):
 				self.TC4title.Enable()
@@ -227,12 +262,15 @@ class ExportGUI(wx.Panel):
 				self.TCy4Label.Enable()
 				self.BcsvCh3.Enable()
 				self.BpdfCh3.Enable()
+				self.cbCh3.Enable()
 			else:
 				self.TC4title.Disable()
 				self.TCx4Label.Disable()
 				self.TCy4Label.Disable()
 				self.BcsvCh3.Disable()
 				self.BpdfCh3.Disable()
+				self.cbCh3.SetValue(False)
+				self.cbCh3.Disable()
 
 		#PDF export won't be available for a while, so no point to enable the button
 		self.BpdfCh0.Disable()
@@ -240,9 +278,12 @@ class ExportGUI(wx.Panel):
 		self.BpdfCh2.Disable()
 		self.BpdfCh3.Disable()
 
+		#Export all data isn't available just yet...
+		self.BpdfAll.Disable()
+		self.BcsvAll.Disable()
 
 
-		
+
 		# # # # # # # # # # # # # #	#
 		#							#
 		#	E	V	E	N	T	S	#
