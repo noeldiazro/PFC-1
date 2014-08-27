@@ -170,17 +170,19 @@ class AcquisitionGUI(wx.Panel):
 		Writes the lines read by the Module into the Axes in MainFrame
 	"""
 	def PushData(self):
+		if (self.plot_color=='z'):
+			return
 		try:
-
 			with self.Module.LOCK:
-				# piDA allows us to ask for the number of points we want to retrieve. 
-				#	In order to trick the lib we need to pass the "minus drawed points":
+				# 	piDA allows us to ask for the number of points we want to retrieve, to keep the 
+				# module as free as possible, we will ask only for the new points, so In order to 
+				# trick the lib we need to pass the "minus drawed points":
 				lists = PointsToDoubleLists(self.Module.get_data(-self.drawedPoints))
 			
-			self.mainFrame.line1.set_xdata(np.append(self.mainFrame.line1.get_xdata(),[x+self.time_offset for x in lists[0]]))
-			self.mainFrame.line1.set_ydata(np.append(self.mainFrame.line1.get_ydata(),lists[1]))
-			self.mainFrame.line1.set_color(self.plot_color)
-			self.mainFrame.axes1.draw_artist(self.mainFrame.line1)
+			self.mainFrame.line[self.channel_id].set_xdata(np.append(self.mainFrame.line[self.channel_id].get_xdata(),[x+self.time_offset for x in lists[0]]))
+			self.mainFrame.line[self.channel_id].set_ydata(np.append(self.mainFrame.line[self.channel_id].get_ydata(),lists[1]))
+			self.mainFrame.line[self.channel_id].set_color(self.plot_color)
+			self.mainFrame.axes.draw_artist(self.mainFrame.line[self.channel_id])
 			
 			self.drawedPoints=self.drawedPoints+len(lists[0])
 
@@ -208,7 +210,6 @@ class AcquisitionGUI(wx.Panel):
 			return     # the user changed idea...
 
 		# proceed loading the file chosen by the user
-		# this can be done with e.g. wxPython input streams:
 		self.Module = Simulator.Simulator(self.samplingRateTCtrl.GetValue())
 		self.Module.setFileInput(openFileDialog.GetPath())
 		self.SetStatusLight("red")
@@ -248,6 +249,7 @@ class AcquisitionGUI(wx.Panel):
 		t.daemon=True
 		t.start()
 		self.mainFrame.ToggleGraphRefreshing(check_channels=True)
+		self.CBPlotColor.Enable()
 
 	def _updateStoppedStatus(self):
 		while(self.Module.get_status()=='running'):
@@ -266,6 +268,9 @@ class AcquisitionGUI(wx.Panel):
 		
 	def PlotColorComboBox(self,event):
 		self.plot_color = IntToCharColor(event.GetEventObject().GetSelection())
+		#If channel's stopped and no other channel active, refresh right away the color.
+		if(self.Module.get_status()=='stopped' and not any(self.mainFrame.channel_active)):
+			self.mainFrame.RefreshGraphOnce()
 
 	def SamplingRateComboBox(self,event):
 		pass
