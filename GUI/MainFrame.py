@@ -26,7 +26,7 @@ class MainFrame(wx.Frame):
 			
 		#Variables used by the graph control
 		self.update_frequency = 5
-		self.autoscale = True
+		self.autoscale = False
 		self.channel_has_input = [False, False, False, False]	#Channel has an available input.
 		self.channel_active = [False, False ,False ,False]		#Channel is currently acquiring data.
 		self.channel_available = [False, False, False, False]	#Channel is available to acquire data.
@@ -53,7 +53,7 @@ class MainFrame(wx.Frame):
 		#View menu structure partially DISABLED
 		vm_updateFreqSM = wx.Menu()
 
-		vm_ufsm_autos = vm_updateFreqSM.Append(5, "Autoscale",kind=wx.ITEM_CHECK).Check()
+		vm_ufsm_autos = vm_updateFreqSM.Append(5, "Autoscale",kind=wx.ITEM_CHECK)
 		
 		viewMenu.AppendSubMenu(vm_updateFreqSM,"Plot settings")
 
@@ -79,6 +79,9 @@ class MainFrame(wx.Frame):
 		self.page = Plot(self)
 		self.axes1 = self.page.figure.gca()
 		self.axes1.set_xlabel("t (s)")
+		self.line1 = self.axes1.plot([],[],'r-')[0]
+		self.page.canvas.draw()
+		self.axes_background = self.page.canvas.copy_from_bbox(self.axes1.bbox)
 		#
 
 		## hbox2
@@ -151,7 +154,6 @@ class MainFrame(wx.Frame):
 
 	def ToggleGraphRefreshing(self,check_channels=False):
 		"""	Toggles automatic graph refreshing with an option to check if there are channels still active. """
-
 		# We don't want to stop the graph refreshing if the call comes from a stopping channel
 		#	and there are other channels still active.
 		if(check_channels and any(self.channel_active) and self.__graphRefreshing):
@@ -172,6 +174,7 @@ class MainFrame(wx.Frame):
 	def RefreshGraphLoop(self):
 		"""Loop implementing every channel data pulling, plot redrawing and autoscale calling"""
 		while (self.__graphRefreshing):
+			self.page.canvas.restore_region(self.axes_background)
 			# Pushes data for each channel if active:
 			if(self.channel_active[0]):
 				self.acqPanel0.PushData();
@@ -189,7 +192,8 @@ class MainFrame(wx.Frame):
 
 	def ReDrawPlot(self):
 		"""Invokes plot redrawing"""
-		self.page.canvas.draw()
+		self.page.canvas.blit(self.axes1.bbox)
+		#self.page.canvas.draw()
 
 	def set_xlabel(self,label):
 		"""Sets the plot x axis label"""
@@ -217,6 +221,7 @@ class MainFrame(wx.Frame):
 	def set_master_module(self,module):
 		"""Sets the master module, usually the module which started first"""
 		if not(self.master_channel):
+			self.axes_background = self.page.canvas.copy_from_bbox(self.axes1.bbox)
 			self.master_channel=module
 
 
@@ -332,7 +337,7 @@ class MainFrame(wx.Frame):
 class Plot(wx.Panel):
 	"""Graph panel"""
 	def __init__(self, parent, id = -1, dpi = None, **kwargs):
-		wx.Panel.__init__(self, parent, id=id, **kwargs)
+	 	wx.Panel.__init__(self, parent, id=id, **kwargs)
 		self.figure = mpl.figure.Figure(dpi=dpi, figsize=(2,2))
 		self.canvas = Canvas(self, -1, self.figure)
 		self.toolbar = Toolbar(self.canvas)
@@ -347,6 +352,9 @@ class Plot(wx.Panel):
 		self.TBGraphRefreshing.SetValue(True)
 		self.sld_updFreq = wx.Slider(self, -1, parent.update_frequency, 2, 20, wx.DefaultPosition, (200, -1),wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_TOP | wx.SL_LABELS)
 
+		canvasSizer = wx.BoxSizer(wx.HORIZONTAL)
+		canvasSizer.Add(self.canvas,1,wx.EXPAND)
+
 		sizer = wx.BoxSizer(wx.VERTICAL)
 		toolbarSizer = wx.BoxSizer(wx.HORIZONTAL)
 		toolbarSizer.Add(self.toolbar, 1 , wx.ALL | wx.EXPAND)
@@ -355,6 +363,6 @@ class Plot(wx.Panel):
 		toolbarSizer.Add(self.BStartAll,0,wx.ALL | wx.EXPAND, border=1)
 		toolbarSizer.Add(self.TBGraphRefreshing,0,wx.ALL | wx.EXPAND, border=1)
 		toolbarSizer.Add(self.sld_updFreq,0,wx.ALL | wx.EXPAND, border=1)
-		sizer.Add(self.canvas,1,wx.EXPAND)
+		sizer.Add(canvasSizer,1,wx.EXPAND)
 		sizer.Add(toolbarSizer,0,wx.EXPAND)
 		self.SetSizer(sizer)
