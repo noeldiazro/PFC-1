@@ -79,9 +79,10 @@ class MainFrame(wx.Frame):
 		self.page = Plot(self)
 		self.axes1 = self.page.figure.gca()
 		self.axes1.set_xlabel("t (s)")
+		self.axes1.set_xlim(right=100)
+		self.axes1.set_ylim(bottom=-0.5,top=10)
 		self.line1 = self.axes1.plot([],[],'r-')[0]
 		self.page.canvas.draw()
-		self.axes_background = self.page.canvas.copy_from_bbox(self.axes1.bbox)
 		#
 
 		## hbox2
@@ -174,7 +175,8 @@ class MainFrame(wx.Frame):
 	def RefreshGraphLoop(self):
 		"""Loop implementing every channel data pulling, plot redrawing and autoscale calling"""
 		while (self.__graphRefreshing):
-			self.page.canvas.restore_region(self.axes_background)
+			if(self.master_channel):
+				self.page.canvas.restore_region(self.axes_background)
 			# Pushes data for each channel if active:
 			if(self.channel_active[0]):
 				self.acqPanel0.PushData();
@@ -332,7 +334,7 @@ class MainFrame(wx.Frame):
 			self.acqPanel3.PushData();
 		wx.CallAfter(self.ReDrawPlot)
 		if self.autoscale:
-			self.axes1.autoscale()
+			self.axes1.autoscale_view()
 
 class Plot(wx.Panel):
 	"""Graph panel"""

@@ -176,14 +176,13 @@ class AcquisitionGUI(wx.Panel):
 				# piDA allows us to ask for the number of points we want to retrieve. 
 				#	In order to trick the lib we need to pass the "minus drawed points":
 				lists = PointsToDoubleLists(self.Module.get_data(-self.drawedPoints))
-				#self.mainFrame.axes1.add_line(lines.Line2D([x+self.time_offset for x in lists[0]],lists[1],color=self.plot_color))
-				self.mainFrame.line1.set_xdata(np.append(self.mainFrame.line1.get_xdata(),[x+self.time_offset for x in lists[0]]))
-				self.mainFrame.line1.set_ydata(np.append(self.mainFrame.line1.get_ydata(),lists[1]))
-				self.mainFrame.axes1.draw_artist(self.mainFrame.line1)
-
-				# To get the continuous line of plot, we have to add the drawed points minus the last one 
-				#	so we will ask for it again:
-				self.drawedPoints=self.drawedPoints+len(lists[0])-1
+			
+			self.mainFrame.line1.set_xdata(np.append(self.mainFrame.line1.get_xdata(),[x+self.time_offset for x in lists[0]]))
+			self.mainFrame.line1.set_ydata(np.append(self.mainFrame.line1.get_ydata(),lists[1]))
+			self.mainFrame.line1.set_color(self.plot_color)
+			self.mainFrame.axes1.draw_artist(self.mainFrame.line1)
+			
+			self.drawedPoints=self.drawedPoints+len(lists[0])
 
 		except RuntimeError as inst:
 			print type(inst)     # the exception instance
