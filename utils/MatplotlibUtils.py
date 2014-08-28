@@ -28,7 +28,7 @@ def IntToCharColor(integer):
 	elif(integer==7):
 		return 'w'
 	else:
-		return 'b'
+		return 'z'
 
 def IntToColor(integer):
 	if(integer==0):

@@ -25,8 +25,8 @@ class MainFrame(wx.Frame):
 			size=(-1, -1))
 			
 		#Variables used by the graph control
-		self.update_frequency = 5
-		self.autoscale = True
+		self.update_frequency = 1
+		self.autoscale = False
 		self.channel_has_input = [False, False, False, False]	#Channel has an available input.
 		self.channel_active = [False, False ,False ,False]		#Channel is currently acquiring data.
 		self.channel_available = [False, False, False, False]	#Channel is available to acquire data.
@@ -53,7 +53,7 @@ class MainFrame(wx.Frame):
 		#View menu structure partially DISABLED
 		vm_updateFreqSM = wx.Menu()
 
-		vm_ufsm_autos = vm_updateFreqSM.Append(5, "Autoscale",kind=wx.ITEM_CHECK).Check()
+		#vm_ufsm_autos = vm_updateFreqSM.Append(5, "Autoscale",kind=wx.ITEM_CHECK)
 		
 		viewMenu.AppendSubMenu(vm_updateFreqSM,"Plot settings")
 
@@ -77,8 +77,17 @@ class MainFrame(wx.Frame):
 		## hbox1
 		# EXAMPLE PLOT
 		self.page = Plot(self)
-		self.axes1 = self.page.figure.gca()
-		self.axes1.set_xlabel("t (s)")
+		self.axes = self.page.figure.gca()
+		self.axes.set_xlabel("t (s)")
+		self.axes.set_xlim(right=100)
+		self.axes.set_ylim(bottom=-0.5,top=5)
+		self.line = []
+		styles = ['b-','g-','r-','c-']
+
+		# We create the plot lines/artists where data is going to be drawn.
+		for s,i in zip(styles,range(4)):
+			self.line.append(self.axes.plot([],[],s)[0])
+		self.page.canvas.draw()
 		#
 
 		## hbox2
@@ -120,7 +129,7 @@ class MainFrame(wx.Frame):
 
 
 		# Events.
-		self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_autos)
+		#self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_autos)
 		#self.Bind(wx.EVT_MENU, self.OnOpen, menuOpen)
 		self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 		self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
@@ -151,12 +160,12 @@ class MainFrame(wx.Frame):
 
 	def ToggleGraphRefreshing(self,check_channels=False):
 		"""	Toggles automatic graph refreshing with an option to check if there are channels still active. """
-
+		if(check_channels and not any(self.channel_active)):
+			self.page.BStopAll.Disable()
 		# We don't want to stop the graph refreshing if the call comes from a stopping channel
 		#	and there are other channels still active.
 		if(check_channels and any(self.channel_active) and self.__graphRefreshing):
 			return
-
 		# If we don't want to check the active channels, want to start/stop 'immediately' graph refreshing
 		#	or last conditional was false, we check current status and invert it.
 		if self.__graphRefreshing:
@@ -170,53 +179,65 @@ class MainFrame(wx.Frame):
 			self.statusbar.PushStatusText("Graph Refreshing ON.")
 
 	def RefreshGraphLoop(self):
-		"""Loop implementing every channel data pulling, plot redrawing and autoscale calling"""
+		"""Loop implementing every channel data pulling, plot redrawing and sleeping time"""
 		while (self.__graphRefreshing):
-			# Pushes data for each channel if active:
-			if(self.channel_active[0]):
-				self.acqPanel0.PushData();
-			if(self.channel_active[1]):
-				self.acqPanel1.PushData();
-			if(self.channel_active[2]):
-				self.acqPanel2.PushData();
-			if(self.channel_active[3]):
-				self.acqPanel3.PushData();
-			wx.CallAfter(self.ReDrawPlot)
-			if self.autoscale:
-				self.axes1.autoscale()
+			#	First we sleep the update frequency. This will give time to the interface
+			# to gather some data too.
 			if (self.update_frequency>0):
 				time.sleep(self.update_frequency)
+			# Then we refresh the graph once.
+			self.RefreshGraphOnce()
+
+	def RefreshGraphOnce(self):
+		"""Implementing ONCE every channel data pulling, plot redrawing"""
+		if(self.master_channel):
+			self.page.canvas.restore_region(self.axes_background)
+		# Pushes data for each channel if has an input and is active or it was:
+		if((self.channel_active[0] or not self.channel_available[0]) and self.channel_has_input[0]):
+			self.acqPanel0.PushData();
+		if((self.channel_active[1] or not self.channel_available[1]) and self.channel_has_input[1]):
+			self.acqPanel1.PushData();
+		if((self.channel_active[2] or not self.channel_available[2]) and self.channel_has_input[2]):
+			self.acqPanel2.PushData();
+		if((self.channel_active[3] or not self.channel_available[3]) and self.channel_has_input[3]):
+			self.acqPanel3.PushData();
+		# We call ReDraw as a CallAfter as this function makes the call in the main GUI thread.
+		wx.CallAfter(self.ReDrawPlot)
+		#if self.autoscale:
+		#	self.axes.autoscale()
 
 	def ReDrawPlot(self):
 		"""Invokes plot redrawing"""
-		self.page.canvas.draw()
+		self.page.canvas.blit(self.axes.bbox)
+		#self.page.canvas.draw()
 
 	def set_xlabel(self,label):
 		"""Sets the plot x axis label"""
-		self.axes1.set_xlabel(label)
+		self.axes.set_xlabel(label)
 
 	def get_xlabel(self):
 		"""Gets the plot x axis label"""
-		return self.axes1.get_xlabel()
+		return self.axes.get_xlabel()
 
 	def set_ylabel(self,label):
 		"""Sets the plot y axis label"""
-		self.axes1.set_ylabel(label)
+		self.axes.set_ylabel(label)
 	def get_ylabel(self):
 		"""Gets the plot y axis label"""
-		return self.axes1.get_ylabel()
+		return self.axes.get_ylabel()
 
 	def set_plot_title(self,title):
 		"""Sets the plot title"""
-		self.axes1.set_title(title)
+		self.axes.set_title(title)
 
 	def get_plot_title(self):
 		"""Gets the plot title"""
-		return self.axes1.get_title()
+		return self.axes.get_title()
 
 	def set_master_module(self,module):
 		"""Sets the master module, usually the module which started first"""
 		if not(self.master_channel):
+			self.axes_background = self.page.canvas.copy_from_bbox(self.axes.bbox)
 			self.master_channel=module
 
 
@@ -299,7 +320,7 @@ class MainFrame(wx.Frame):
 		if(self.acqPanel2.Module and not self.channel_active[2] and self.channel_available[2]):
 			self.acqPanel2.StartClick(e)
 		if(self.acqPanel3.Module and not self.channel_active[3] and self.channel_available[3]):
-			self.acqPanel0.StartClick(e)
+			self.acqPanel3.StartClick(e)
 
 	
 	def OnStopAll(self,e):
@@ -311,28 +332,16 @@ class MainFrame(wx.Frame):
 		if(self.acqPanel2.Module and self.channel_active[2]):
 			self.acqPanel2.StopClick(e)
 		if(self.acqPanel3.Module and self.channel_active[3]):
-			self.acqPanel0.StopClick(e)
+			self.acqPanel3.StopClick(e)
 
 	def OnRefreshAll(self,e):
 		"""	Pulls data from the modules and immediately prints it on the plot."""
-
-		# Pushes data for each channel if active:
-		if(self.acqPanel0.Module and not self.channel_available[0]):
-			self.acqPanel0.PushData();
-		if(self.acqPanel1.Module and not self.channel_available[1]):
-			self.acqPanel1.PushData();
-		if(self.acqPanel2.Module and not self.channel_available[2]):
-			self.acqPanel2.PushData();
-		if(self.acqPanel3.Module and not self.channel_available[3]):
-			self.acqPanel3.PushData();
-		wx.CallAfter(self.ReDrawPlot)
-		if self.autoscale:
-			self.axes1.autoscale()
+		self.RefreshGraphOnce()
 
 class Plot(wx.Panel):
 	"""Graph panel"""
 	def __init__(self, parent, id = -1, dpi = None, **kwargs):
-		wx.Panel.__init__(self, parent, id=id, **kwargs)
+	 	wx.Panel.__init__(self, parent, id=id, **kwargs)
 		self.figure = mpl.figure.Figure(dpi=dpi, figsize=(2,2))
 		self.canvas = Canvas(self, -1, self.figure)
 		self.toolbar = Toolbar(self.canvas)
@@ -345,7 +354,10 @@ class Plot(wx.Panel):
 		#Update frequency control
 		self.TBGraphRefreshing =  wx.ToggleButton(self,label="Automatic Update",size=(-1,-1))
 		self.TBGraphRefreshing.SetValue(True)
-		self.sld_updFreq = wx.Slider(self, -1, parent.update_frequency, 2, 20, wx.DefaultPosition, (200, -1),wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_TOP | wx.SL_LABELS)
+		self.sld_updFreq = wx.Slider(self, -1, parent.update_frequency, 1, 20, wx.DefaultPosition, (200, -1),wx.SL_AUTOTICKS | wx.SL_HORIZONTAL | wx.SL_TOP | wx.SL_LABELS)
+
+		canvasSizer = wx.BoxSizer(wx.HORIZONTAL)
+		canvasSizer.Add(self.canvas,1,wx.EXPAND)
 
 		sizer = wx.BoxSizer(wx.VERTICAL)
 		toolbarSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -355,6 +367,6 @@ class Plot(wx.Panel):
 		toolbarSizer.Add(self.BStartAll,0,wx.ALL | wx.EXPAND, border=1)
 		toolbarSizer.Add(self.TBGraphRefreshing,0,wx.ALL | wx.EXPAND, border=1)
 		toolbarSizer.Add(self.sld_updFreq,0,wx.ALL | wx.EXPAND, border=1)
-		sizer.Add(self.canvas,1,wx.EXPAND)
+		sizer.Add(canvasSizer,1,wx.EXPAND)
 		sizer.Add(toolbarSizer,0,wx.EXPAND)
 		self.SetSizer(sizer)
