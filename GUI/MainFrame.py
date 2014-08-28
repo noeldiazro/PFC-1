@@ -80,10 +80,11 @@ class MainFrame(wx.Frame):
 		self.axes = self.page.figure.gca()
 		self.axes.set_xlabel("t (s)")
 		self.axes.set_xlim(right=100)
-		self.axes.set_ylim(bottom=-0.5,top=10)
+		self.axes.set_ylim(bottom=-0.5,top=5)
 		self.line = []
 		styles = ['b-','g-','r-','c-']
 
+		# We create the plot lines/artists where data is going to be drawn.
 		for s,i in zip(styles,range(4)):
 			self.line.append(self.axes.plot([],[],s)[0])
 		self.page.canvas.draw()
@@ -178,12 +179,17 @@ class MainFrame(wx.Frame):
 			self.statusbar.PushStatusText("Graph Refreshing ON.")
 
 	def RefreshGraphLoop(self):
-		"""Loop implementing every channel data pulling, plot redrawing and autoscale calling"""
+		"""Loop implementing every channel data pulling, plot redrawing and sleeping time"""
 		while (self.__graphRefreshing):
+			#	First we sleep the update frequency. This will give time to the interface
+			# to gather some data too.
+			if (self.update_frequency>0):
+				time.sleep(self.update_frequency)
+			# Then we refresh the graph once.
 			self.RefreshGraphOnce()
 
 	def RefreshGraphOnce(self):
-		"""Implementing ONCE every channel data pulling, plot redrawing and autoscale calling"""
+		"""Implementing ONCE every channel data pulling, plot redrawing"""
 		if(self.master_channel):
 			self.page.canvas.restore_region(self.axes_background)
 		# Pushes data for each channel if has an input and is active or it was:
@@ -195,11 +201,10 @@ class MainFrame(wx.Frame):
 			self.acqPanel2.PushData();
 		if((self.channel_active[3] or not self.channel_available[3]) and self.channel_has_input[3]):
 			self.acqPanel3.PushData();
+		# We call ReDraw as a CallAfter as this function makes the call in the main GUI thread.
 		wx.CallAfter(self.ReDrawPlot)
 		#if self.autoscale:
 		#	self.axes.autoscale()
-		if (self.update_frequency>0):
-			time.sleep(self.update_frequency)
 
 	def ReDrawPlot(self):
 		"""Invokes plot redrawing"""
@@ -315,7 +320,7 @@ class MainFrame(wx.Frame):
 		if(self.acqPanel2.Module and not self.channel_active[2] and self.channel_available[2]):
 			self.acqPanel2.StartClick(e)
 		if(self.acqPanel3.Module and not self.channel_active[3] and self.channel_available[3]):
-			self.acqPanel0.StartClick(e)
+			self.acqPanel3.StartClick(e)
 
 	
 	def OnStopAll(self,e):
@@ -327,23 +332,11 @@ class MainFrame(wx.Frame):
 		if(self.acqPanel2.Module and self.channel_active[2]):
 			self.acqPanel2.StopClick(e)
 		if(self.acqPanel3.Module and self.channel_active[3]):
-			self.acqPanel0.StopClick(e)
+			self.acqPanel3.StopClick(e)
 
 	def OnRefreshAll(self,e):
 		"""	Pulls data from the modules and immediately prints it on the plot."""
-
-		# Pushes data for each channel if active:
-		if(self.acqPanel0.Module and not self.channel_available[0]):
-			self.acqPanel0.PushData();
-		if(self.acqPanel1.Module and not self.channel_available[1]):
-			self.acqPanel1.PushData();
-		if(self.acqPanel2.Module and not self.channel_available[2]):
-			self.acqPanel2.PushData();
-		if(self.acqPanel3.Module and not self.channel_available[3]):
-			self.acqPanel3.PushData();
-		wx.CallAfter(self.ReDrawPlot)
-		if self.autoscale:
-			self.axes.autoscale_view()
+		self.RefreshGraphOnce()
 
 class Plot(wx.Panel):
 	"""Graph panel"""
