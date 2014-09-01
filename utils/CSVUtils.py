@@ -48,7 +48,7 @@ class Writer:
 	def __init__(self, filepath, dialect=csv.excel, encoding="utf-8", **kwds):
 		# Redirect output to a queue
 		self.queue = cStringIO.StringIO()
-		self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+		self.writer = csv.writer(self.queue, dialect=dialect,delimiter='\t', **kwds)
 		self.stream = open(filepath, 'wb')
 		self.encoder = codecs.getincrementalencoder(encoding)()
 
