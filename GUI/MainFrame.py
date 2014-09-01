@@ -80,7 +80,7 @@ class MainFrame(wx.Frame):
 		self.axes = self.page.figure.gca()
 		self.axes.set_ylabel("v")
 		self.axes.set_xlabel("t (s)")
-		self.axes.set_xlim(right=100)
+		self.axes.set_xlim(right=300)
 		self.axes.set_ylim(bottom=-0.5,top=5)
 		self.line = []
 		styles = ['b-','g-','r-','c-']
