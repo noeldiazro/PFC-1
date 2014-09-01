@@ -313,8 +313,8 @@ class ExportGUI(wx.Panel):
 		elif (e.GetId() == 2):
 			output.writerow([self.TC3title.GetValue()])
 			output.writerow([self.TCx3Label.GetValue(),self.TCy3Label.GetValue()])
-			output.writerows(self.mainFrame.acqPanel1.Module.get_data())
+			output.writerows(self.mainFrame.acqPanel2.Module.get_data())
 		elif (e.GetId() == 3):
 			output.writerow([self.TC4title.GetValue()])
 			output.writerow([self.TCx4Label.GetValue(),self.TCy4Label.GetValue()])
-			output.writerows(self.mainFrame.acqPanel1.Module.get_data())
+			output.writerows(self.mainFrame.acqPanel3.Module.get_data())
