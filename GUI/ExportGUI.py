@@ -299,7 +299,7 @@ class ExportGUI(wx.Panel):
 	def OnExportChannelToCSV(self,e):
 		"""Exports channel data to a csv file."""
 		filepath = self.SaveFileDialog()
-		if filepath=="":
+		if filepath==None:
 			return
 		output = Writer(filepath)
 		if (e.GetId() == 0):
