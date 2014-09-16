@@ -70,6 +70,9 @@ class Simulator:
 				tmp=self.csv.p.next()
 				with self.LOCK:
 					self._data.append(tmp[0],tmp[1])
+				if(self.sampling_rate==0):
+					time.sleep(0)
+					continue
 				time.sleep(1.0/self.sampling_rate)
 			except StopIteration:
 				#start over

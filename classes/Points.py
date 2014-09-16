@@ -32,7 +32,7 @@ class Points:
 			else:
 				self.__offset += self.x[self.__i-1]
 				self.resetIterator()
-				print "Iterator reset. New offset: ",self.__offset
+				#print "Iterator reset. New offset: ",self.__offset
 				return [self.x[self.__i]+self.__offset,self.y[self.__i]]
 			return [self.x[self.__i-1]+self.__offset,self.y[self.__i-1]]
 		except IndexError  as e:
