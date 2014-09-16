@@ -149,14 +149,15 @@ class AcquisitionGUI(wx.Panel):
 		Disables widgets so the user won't mess up anything clicking when he's not supposed to.
 		TODO
 	"""
-	def ToggleWidgets(self,status):
+	def ToggleWidgets(self,status,ignore_CBPlotColor=False):
 		if status==False:
 			self.samplingRateTCtrl.Disable()
 			self.SRMeasure.Disable()
 			self.startButton.Disable()
 			self.pauseButton.Disable()
 			self.simButton.Disable()
-			self.CBPlotColor.Disable()
+			if not ignore_CBPlotColor:
+				self.CBPlotColor.Disable()
 			
 		else:
 			self.samplingRateTCtrl.Enable()
@@ -164,7 +165,8 @@ class AcquisitionGUI(wx.Panel):
 			self.startButton.Enable()
 			self.pauseButton.Enable()
 			self.simButton.Enable()
-			self.CBPlotColor.Enable()
+			if not ignore_CBPlotColor:
+				self.CBPlotColor.Enable()
 	
 	"""
 		Writes the lines read by the Module into the Axes in MainFrame
@@ -240,7 +242,7 @@ class AcquisitionGUI(wx.Panel):
 		self.mainFrame.disableStartAllButton()
 
 	def StopClick(self,e):
-		self.ToggleWidgets(False)
+		self.ToggleWidgets(False,ignore_CBPlotColor=True)
 		self.Module.stop()
 		self.mainFrame.channel_active[self.channel_id]=False
 		self.SetStatusLight("yellow")
@@ -248,8 +250,8 @@ class AcquisitionGUI(wx.Panel):
 		t = threading.Thread(target=self._updateStoppedStatus)
 		t.daemon=True
 		t.start()
+
 		self.mainFrame.ToggleGraphRefreshing(check_channels=True)
-		self.CBPlotColor.Enable()
 
 	def _updateStoppedStatus(self):
 		while(self.Module.get_status()=='running'):
