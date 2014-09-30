@@ -160,7 +160,7 @@ class MainFrame(wx.Frame):
 
 	def ToggleGraphRefreshing(self,check_channels=False):
 		"""	Toggles automatic graph refreshing with an option to check if there are channels still active. """
-		if(check_channels and not any(self.channel_active)):
+		if(check_channels and not any(self.channel_active) and not any(self.channel_available)):
 			self.page.BStopAll.Disable()
 		# We don't want to stop the graph refreshing if the call comes from a stopping channel
 		#	and there are other channels still active.
