@@ -118,11 +118,10 @@ class MainFrame(wx.Frame):
 		self.nb.AddPage(self.acquisitionPage,"Acquisition")
 		self.nb.AddPage(self.DataPage,"Data")
 		self.nb.AddPage(self.ExportPage,"Export")
+		self.nb.SetMinSize(wx.Size(1024,210))
 
-		hbox1.Add(self.page, 1, flag=wx.EXPAND)
-		hbox2.Add(self.nb,1, flag=wx.EXPAND)
-		vbox.Add(hbox1, 2, flag=wx.EXPAND | wx.ALL)
-		vbox.Add(hbox2, 1, flag=wx.EXPAND | wx.ALL)
+		vbox.Add(self.page, 1, flag=wx.EXPAND)
+		vbox.Add(self.nb, 0, flag=wx.EXPAND | wx.ALL)
 
 		
 

@@ -46,8 +46,7 @@ class AcquisitionGUI(wx.Panel):
 		box = wx.StaticBox(self, wx.ID_ANY, text)
 		hbox = wx.BoxSizer(wx.HORIZONTAL)	# horizonal layout
 		border = wx.StaticBoxSizer(box, orient=wx.VERTICAL)	# border layout for static box
-		vbox1 = wx.BoxSizer(wx.VERTICAL) 	#first column
-		vbox2 = wx.BoxSizer(wx.VERTICAL) 	#second column
+		vbox = wx.BoxSizer(wx.VERTICAL) 	#Items will be arranged vertically
 
 
 		#	First row
@@ -59,7 +58,7 @@ class AcquisitionGUI(wx.Panel):
 		self.statusPNG = self.greyLight
 		self.imageCtrl = wx.StaticBitmap(self, wx.ID_ANY, wx.BitmapFromImage(self.statusPNG))
 		hbox1.Add(self.imageCtrl,border=10,flag=wx.ALIGN_RIGHT)
-		vbox1.Add(hbox1, flag=wx.ALIGN_CENTER)
+		vbox.Add(hbox1, flag=wx.ALIGN_CENTER)
 
 		# Plot color row
 		hbox4 = wx.BoxSizer(wx.HORIZONTAL) 
@@ -68,10 +67,10 @@ class AcquisitionGUI(wx.Panel):
 		self.CBPlotColor.SetSelection(self.channel_id) 
 		self.CBPlotColor.Bind(wx.EVT_COMBOBOX, self.PlotColorComboBox)
 		hbox4.Add(self.CBPlotColor,flag=wx.ALIGN_CENTER|wx.TOP,border=2)
-		vbox1.Add(hbox4,flag=wx.ALIGN_CENTER)
+		vbox.Add(hbox4,flag=wx.ALIGN_CENTER)
 
 		# Sampling rate text
-		vbox1.Add(wx.StaticText(self, label='Sampling rate:'),flag=wx.ALIGN_CENTER|wx.TOP,border=2)
+		vbox.Add(wx.StaticText(self, label='Sampling rate:'),flag=wx.ALIGN_CENTER|wx.TOP,border=2)
 
 		# And sampling rate row
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
@@ -82,7 +81,7 @@ class AcquisitionGUI(wx.Panel):
 		self.SRMeasure.Bind(wx.EVT_COMBOBOX, self.SamplingRateComboBox)
 		hbox2.Add(self.samplingRateTCtrl,flag=wx.ALIGN_CENTER)
 		hbox2.Add(self.SRMeasure,flag=wx.ALIGN_CENTER)
-		vbox1.Add(hbox2,flag=wx.ALIGN_CENTER)
+		vbox.Add(hbox2,flag=wx.ALIGN_CENTER)
 
 
 		#	Control buttons
@@ -94,16 +93,16 @@ class AcquisitionGUI(wx.Panel):
 		self.startButton.Bind(wx.EVT_BUTTON,self.StartClick)
 		hbox3.Add(self.pauseButton,flag=wx.ALIGN_CENTER|wx.ALL,border=5)
 		hbox3.Add(self.startButton,flag=wx.ALIGN_CENTER|wx.ALL,border=5)
-		vbox1.Add(hbox3,flag=wx.ALIGN_CENTER)
+		vbox.Add(hbox3,flag=wx.ALIGN_CENTER)
 
 		#	Simulation button
 		self.simButton=wx.Button(self,label="Simulation")
 		self.simButton.Bind(wx.EVT_BUTTON, self.SimulationClick)
-		vbox1.Add(self.simButton,flag=wx.ALIGN_CENTER|wx.LEFT|wx.RIGHT, border=50)
+		vbox.Add(self.simButton,flag=wx.ALIGN_CENTER|wx.LEFT|wx.RIGHT, border=50)
 
 		# Main sizers arrangements
 
-		border.Add(vbox1,1,flag=wx.ALIGN_CENTER|wx.EXPAND)
+		border.Add(vbox,1,flag=wx.ALIGN_CENTER)
 		hbox.Add(border,1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=2)
 		self.SetSizerAndFit(hbox)
 		
