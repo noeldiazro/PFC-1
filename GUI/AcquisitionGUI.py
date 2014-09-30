@@ -172,6 +172,12 @@ class AcquisitionGUI(wx.Panel):
 	"""
 	def PushData(self):
 		if (self.plot_color=='z'):
+			if(self.mainFrame.line[self.channel_id].get_xdata()==None):	#If line is already erased, we do nothing.
+				return
+			#If it isn't erased, we do the appropriate thing:
+			self.mainFrame.line[self.channel_id].set_xdata(None)
+			self.mainFrame.line[self.channel_id].set_ydata(None)
+			self.drawedPoints=0	#And reset the drawed points counter, so it gets drawn in full next time.
 			return
 		try:
 			with self.Module.LOCK:
