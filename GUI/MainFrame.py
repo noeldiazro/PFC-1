@@ -22,7 +22,7 @@ class MainFrame(wx.Frame):
 
 	def __init__(self, parent, title):
 		super(MainFrame, self).__init__(parent, title=title, 
-			size=(-1, -1))
+			size=(1024, 768))
 			
 		#Variables used by the graph control
 		self.update_frequency = 1
@@ -36,7 +36,7 @@ class MainFrame(wx.Frame):
 
 		self.InitUI()
 		self.Centre()
-		self.SetMinSize(self.GetSize())
+		self.SetMinSize(wx.Size(1024,480))
 		self.Maximize()
 		self.Show()
 		
