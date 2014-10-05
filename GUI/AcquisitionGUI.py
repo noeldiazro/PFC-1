@@ -19,24 +19,10 @@ class AcquisitionGUI(wx.Panel):
 		self.mainFrame=mainFrame
 		self.channel_id = channel_id
 		self.plot_color = IntToCharColor(channel_id)
-		self.time_offset=0
+		self.Module=False
+
 		self.InitUI(parent)
-		self.drawedPoints = 0
-		#HW Channel initialization through piDA lib
-		inter0 = piDAInterface()
-		#This tries to initialize the channel.
-		# If it's not available, it will disable the widgets.
-		try:	
-			ch0 = inter0.get_channel_by_id(channel_id)
-			self.Module = piDA.Acquisition(1,ch0)
-			self.SetStatusLight("green")
-			self.SetStatusText("Ready.")
-			self.mainFrame.channel_has_input[channel_id] = True
-			self.mainFrame.channel_available[channel_id] = True
-		except IndexError:	#Meaning there's no input for this channel.
-			self.ToggleWidgets(False)
-			self.Module=False
-			del inter0
+		self.ResetModule()
 
 	def InitUI(self,parent):
 		self.InitStatusLights()
@@ -154,7 +140,7 @@ class AcquisitionGUI(wx.Panel):
 			self.SRMeasure.Disable()
 			self.startButton.Disable()
 			self.pauseButton.Disable()
-			self.simButton.Disable()
+			#self.simButton.Disable()
 			if not ignore_CBPlotColor:
 				self.CBPlotColor.Disable()
 			
@@ -174,11 +160,10 @@ class AcquisitionGUI(wx.Panel):
 		if (self.plot_color=='z'):
 			if(self.mainFrame.line[self.channel_id].get_xdata()==None):	#If line is already erased, we do nothing.
 				return
-			#If it isn't erased, we do the appropriate thing:
-			self.mainFrame.line[self.channel_id].set_xdata(None)
-			self.mainFrame.line[self.channel_id].set_ydata(None)
-			self.drawedPoints=0	#And reset the drawed points counter, so it gets drawn in full next time.
-			return
+			else:
+				#If it isn't erased, we do the appropriate thing:
+				self.ErasePlotData()
+				return
 		try:
 			with self.Module.LOCK:
 				# 	piDA allows us to ask for the number of points we want to retrieve, to keep the 
@@ -200,12 +185,44 @@ class AcquisitionGUI(wx.Panel):
 			print len(self.Module.data.x)
 			print len(self.Module.data.y)
 
+	def ErasePlotData(self):
+		self.mainFrame.line[self.channel_id].set_xdata(None)
+		self.mainFrame.line[self.channel_id].set_ydata(None)
+		self.drawedPoints=0	#And reset the drawed points counter, so it gets drawn in full next time.
+
+	def ResetModule(self):
+		#If channel is active, first thing is to stop it.
+		if(self.mainFrame.channel_active[self.channel_id]):
+			self.StopClick(None)
+		if(self.Module):
+			del self.Module
+			self.ErasePlotData()
+		self.time_offset = 0
+		self.drawedPoints = 0
+		#HW Channel initialization through piDA lib
+		inter0 = piDAInterface()
+		#This tries to initialize the channel.
+		# If it's not available, it will disable the widgets.
+		try:	
+			ch0 = inter0.get_channel_by_id(self.channel_id)
+			self.Module = piDA.Acquisition(1,ch0)
+			self.SetStatusLight("green")
+			self.SetStatusText("Ready.")
+			self.mainFrame.channel_has_input[self.channel_id] = True
+			self.mainFrame.channel_available[self.channel_id] = True
+		except IndexError:	#Meaning there's no input for this channel.
+			self.ToggleWidgets(False)
+			self.Module=False
+			del inter0
+		self.ToggleWidgets(True)
 
 	#							#
 	#	E	V	E	N	T	S	#
 	#							#
 
 	def SimulationClick(self,event):
+		self.ResetModule()
+		"""
 		oldLight = self.SetStatusLight("yellow")
 		oldText = self.SetStatusText("Busy...")
 		self.ToggleWidgets(False)
@@ -223,10 +240,11 @@ class AcquisitionGUI(wx.Panel):
 		self.SetStatusText("Ready.")
 		event.GetEventObject().SetLabel(openFileDialog.GetFilename())
 		self.ToggleWidgets(True)
+		"""
 
 	def StartClick(self,event):
 		self.startButton.Disable()
-		self.simButton.Disable()
+		#self.simButton.Disable()
 		self.Module.start()
 		self.SetStatusText("Active.")
 		self.SetStatusLight("yellow")

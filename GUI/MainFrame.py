@@ -32,6 +32,7 @@ class MainFrame(wx.Frame):
 		self.channel_available = [False, False, False, False]	#Channel is available to acquire data.
 		self.master_channel = False
 		self.__graphRefreshing=False
+		self.axes_background = False
 
 
 		self.InitUI()
@@ -46,7 +47,9 @@ class MainFrame(wx.Frame):
 		# Setting up the menu.
 		fileMenu = wx.Menu()
 		viewMenu = wx.Menu()
+		acqMenu = wx.Menu()
 		helpMenu = wx.Menu()
+
 		menuOpen = fileMenu.Append(wx.ID_OPEN, "&Open Session","Open a saved session")
 		menuExit = fileMenu.Append(wx.ID_EXIT,"&Exit","Exit the program")
 		
@@ -57,16 +60,27 @@ class MainFrame(wx.Frame):
 		
 		viewMenu.AppendSubMenu(vm_updateFreqSM,"Plot settings")
 
+		#acqMenu
+		resetChMenu = wx.Menu()
+		am_all = resetChMenu.Append(20,"All channels.","Resets all channels and wipes all data acquired.")
+		resetChMenu.AppendSeparator()
+		am_ch0 = resetChMenu.Append(21,"Channel #0","Resets channel #0 and wipes its data.")
+		am_ch1 = resetChMenu.Append(22,"Channel #1","Resets channel #1 and wipes its data.")
+		am_ch2 = resetChMenu.Append(23,"Channel #2","Resets channel #2 and wipes its data.")
+		am_ch3 = resetChMenu.Append(24,"Channel #3","Resets channel #3 and wipes its data.")
+
+		acqMenu.AppendSubMenu(resetChMenu,"Reset channel")
+
 		menuHelp= helpMenu.Append(wx.ID_HELP, "&Help","General help")
 		menuAbout= helpMenu.Append(wx.ID_ABOUT, "&About","About this program")
 
 		# Creating the menubar.
 		menuBar = wx.MenuBar()
 		menuBar.Append(fileMenu,"&File") # Adding the "fileMenu" to the MenuBar
+		menuBar.Append(acqMenu,"&Acquisition")
 		menuBar.Append(viewMenu,"&View")
 		menuBar.Append(helpMenu,"&Help")
 		self.SetMenuBar(menuBar)  # Adding the MenuBar to the Frame content.
-
 
 
 		vbox = wx.BoxSizer(wx.VERTICAL)
@@ -131,6 +145,12 @@ class MainFrame(wx.Frame):
 		# Events.
 		#self.Bind(wx.EVT_MENU, self.SetUpdateFrequency,vm_ufsm_autos)
 		#self.Bind(wx.EVT_MENU, self.OnOpen, menuOpen)
+		self.Bind(wx.EVT_MENU, self.OnResetCh,am_all)
+		self.Bind(wx.EVT_MENU, self.OnResetCh,am_ch0)
+		self.Bind(wx.EVT_MENU, self.OnResetCh,am_ch1)
+		self.Bind(wx.EVT_MENU, self.OnResetCh,am_ch2)
+		self.Bind(wx.EVT_MENU, self.OnResetCh,am_ch3)
+
 		self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 		self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
 		
@@ -189,9 +209,17 @@ class MainFrame(wx.Frame):
 			self.RefreshGraphOnce()
 
 	def RefreshGraphOnce(self):
-		"""Implementing ONCE every channel data pulling, plot redrawing"""
-		if(self.master_channel):
+		"""
+			Implementing ONCE every channel data pulling, plot redrawing.
+			Also axes_background management
+
+		"""
+
+		if(self.axes_background):
 			self.page.canvas.restore_region(self.axes_background)
+		else:
+			self.axes_background = self.page.canvas.copy_from_bbox(self.axes.bbox)
+
 		# Pushes data for each channel if has an input and is active or it was:
 		if((self.channel_active[0] or not self.channel_available[0]) and self.channel_has_input[0]):
 			self.acqPanel0.PushData();
@@ -237,7 +265,6 @@ class MainFrame(wx.Frame):
 	def set_master_module(self,module):
 		"""Sets the master module, usually the module which started first"""
 		if not(self.master_channel):
-			self.axes_background = self.page.canvas.copy_from_bbox(self.axes.bbox)
 			self.master_channel=module
 
 
@@ -249,6 +276,7 @@ class MainFrame(wx.Frame):
 		"""Disables StartAll Button if useless"""
 		if self.all_channels_active():
 			self.page.BStartAll.Disable()
+
 
 	#							#
 	#	E	V	E	N	T	S	#
@@ -337,6 +365,23 @@ class MainFrame(wx.Frame):
 	def OnRefreshAll(self,e):
 		"""	Pulls data from the modules and immediately prints it on the plot."""
 		self.RefreshGraphOnce()
+
+	def OnResetCh(self,e):
+		if(e.GetId() == 20 or e.GetId() == 21):
+			self.acqPanel0.ResetModule()
+		if(e.GetId() == 20 or e.GetId() == 22):
+			self.acqPanel1.ResetModule()
+		if(e.GetId() == 20 or e.GetId() == 23):
+			self.acqPanel2.ResetModule()
+		if(e.GetId() == 20 or e.GetId() == 24):
+			self.acqPanel3.ResetModule()
+		if(e.GetId()==20):
+			self.master_channel = None
+
+		self.page.BStartAll.Enable()
+		self.page.BStopAll.Enable()
+		self.RefreshGraphOnce()
+
 
 class Plot(wx.Panel):
 	"""Graph panel"""
