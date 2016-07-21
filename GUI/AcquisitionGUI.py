@@ -7,8 +7,8 @@ from classes import Simulator
 from utils.PointUtils import PointsToDoubleLists
 from utils.MatplotlibUtils import *
 import matplotlib.lines as lines
-import piDA
-from piDA.interfaces import piDAInterface
+from pida.acquisitions import SynchronousAcquisition
+from pida.interfaces import InterfaceBuilder
 import numpy as np
 
 
@@ -166,7 +166,7 @@ class AcquisitionGUI(wx.Panel):
 				return
 		try:
 			with self.Module.LOCK:
-				# 	piDA allows us to ask for the number of points we want to retrieve, to keep the 
+				# 	pida allows us to ask for the number of points we want to retrieve, to keep the 
 				# module as free as possible, we will ask only for the new points, so In order to 
 				# trick the lib we need to pass the "minus drawed points":
 				lists = PointsToDoubleLists(self.Module.get_data(-self.drawedPoints))
@@ -199,13 +199,13 @@ class AcquisitionGUI(wx.Panel):
 			self.ErasePlotData()
 		self.time_offset = 0
 		self.drawedPoints = 0
-		#HW Channel initialization through piDA lib
-		inter0 = piDAInterface()
+		#HW Channel initialization through pida lib
+		inter0 = InterfaceBuilder().build("PidaInterface")
 		#This tries to initialize the channel.
 		# If it's not available, it will disable the widgets.
 		try:	
 			ch0 = inter0.get_channel_by_id(self.channel_id)
-			self.Module = piDA.Acquisition(1,ch0)
+			self.Module = SynchronousAcquisition(ch0, 0, 1)
 			self.SetStatusLight("green")
 			self.SetStatusText("Ready.")
 			self.mainFrame.channel_has_input[self.channel_id] = True
@@ -277,9 +277,9 @@ class AcquisitionGUI(wx.Panel):
 		self.mainFrame.ToggleGraphRefreshing(check_channels=True)
 
 	def _updateStoppedStatus(self):
-		while(self.Module.get_status()=='running'):
+		while(self.Module.status=='running'):
 			pass
-		if(self.Module.get_status()=='stopped'):
+		if(self.Module.status=='stopped'):
 			self.SetStatusText("Stopped.")
 			self.SetStatusLight("red")
 		else:
@@ -294,7 +294,7 @@ class AcquisitionGUI(wx.Panel):
 	def PlotColorComboBox(self,event):
 		self.plot_color = IntToCharColor(event.GetEventObject().GetSelection())
 		#If channel's stopped and no other channel active, refresh right away the color.
-		if(self.Module.get_status()=='stopped' and not any(self.mainFrame.channel_active)):
+		if(self.Module.status=='stopped' and not any(self.mainFrame.channel_active)):
 			self.mainFrame.RefreshGraphOnce()
 
 	def SamplingRateComboBox(self,event):
